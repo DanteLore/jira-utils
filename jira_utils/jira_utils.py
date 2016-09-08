@@ -14,6 +14,10 @@ class Jira:
         else:
             return "{0} and {1}".format(self.jql, fragment)
 
+    def with_id(self, id):
+        fragment = 'id = "{0}"'.format(id)
+        return Jira(self.server, self.join(fragment))
+
     def with_project(self, project):
         fragment = 'project = "{0}"'.format(project)
         return Jira(self.server, self.join(fragment))
@@ -36,6 +40,9 @@ class Jira:
 
     def assigned(self):
         return Jira(self.server, self.join('assignee is not empty'))
+
+    def created_in_last_n_days(self, days):
+        return Jira(self.server, self.join('created >= -{0}d'.format(days)))
 
     def get_issues(self):
         if self.jira is None:

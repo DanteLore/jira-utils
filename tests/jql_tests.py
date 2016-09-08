@@ -8,6 +8,10 @@ class JiraJqlGenerationTests(unittest.TestCase):
         jira = Jira("").with_project("TEST")
         self.assertEqual('project = "TEST"', jira.jql)
 
+    def test_query_by_id(self):
+        jira = Jira("").with_id("XXX-470")
+        self.assertEqual('id = "XXX-470"', jira.jql)
+
     def test_label_filter(self):
         jira = Jira("").with_label("LAB1")
         self.assertEqual('labels in ("LAB1")', jira.jql)
@@ -35,4 +39,12 @@ class JiraJqlGenerationTests(unittest.TestCase):
     def test_longer_join(self):
         jira = Jira("").status_is_not(["S1", "S2"]).not_assigned().with_label("MYLABEL")
         self.assertEqual('status not in ("S1", "S2") and assignee is empty and labels in ("MYLABEL")', jira.jql)
+
+    def test_created_since_1_day_ago(self):
+        jira = Jira("").created_in_last_n_days(1)
+        self.assertEqual('created >= -1d', jira.jql)
+
+    def test_created_since_8_days_ago(self):
+        jira = Jira("").created_in_last_n_days(8)
+        self.assertEqual('created >= -8d', jira.jql)
 

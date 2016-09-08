@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+import dateutil.parser
+import pytz
+
 class MockIssue:
     class _MockIssueFields:
         def __init__(self, fields):
@@ -6,6 +10,8 @@ class MockIssue:
             self.assignee = fields.get("assignee")
             self.status = fields.get("status")
             self.project = fields.get("project")
+            self.created = fields.get("created")
+            self.updated = fields.get("updated")
 
     def __init__(self, fields):
         self.fields = self._MockIssueFields(fields)
@@ -18,7 +24,9 @@ class MockIssue:
 
 
 class MockJira:
-    def __init__(self, issues=None, issue_objects=None):
+    def __init__(self, issues=None, issue_objects=None, server=""):
+        self.server = server
+
         if issue_objects is None:
             self.issues = []
         else:
@@ -29,11 +37,21 @@ class MockJira:
                 issue = MockIssue(row)
                 self.issues.append(issue)
 
+    def with_id(self, id):
+        new_issues = filter(lambda i: i.fields.id == id, self.issues)
+        return MockJira(issue_objects=new_issues)
+
     def with_project(self, project):
         return self
 
     def with_label(self, label):
         return self
+
+    def created_in_last_n_days(self, days):
+        threshold = datetime.utcnow() - timedelta(days=days)
+        threshold = pytz.UTC.localize(threshold)
+        new_issues = filter(lambda i: i.fields.created is not None and dateutil.parser.parse(i.fields.created) >= threshold, self.issues)
+        return MockJira(issue_objects=new_issues)
 
     def status_is_not(self, statuses):
         lower_statuses = map(lambda s: s.lower(), statuses)
