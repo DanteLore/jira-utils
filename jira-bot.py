@@ -21,8 +21,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logger = logging.getLogger("JiraBot")
+    streamHandler = logging.StreamHandler()
+    streamHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     logger.setLevel(args.log_level)
-    logger.addHandler(logging.StreamHandler())
+    logger.addHandler(streamHandler)
 
     jira = Jira(args.jira)
     attachment_converter = MessageToJiraAttachmentConverter(jira)
