@@ -20,7 +20,7 @@ class MessageToJiraAttachmentConverter:
                 "pretext": "",
                 "title": "{0}: {1}".format(id, issue.fields.summary),
                 "title_link": self.format_str.format(id),
-                "text": ""
+                "text": "Assigned: {0} Status: {1}".format(issue.fields.assignee or "-", issue.fields.status)
             }
 
     def apply(self, message):
