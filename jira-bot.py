@@ -21,10 +21,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logger = logging.getLogger("JiraBot")
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     logger.setLevel(args.log_level)
-    logger.addHandler(streamHandler)
+    logger.addHandler(stream_handler)
 
     jira = Jira(args.jira)
     attachment_converter = MessageToJiraAttachmentConverter(jira)
@@ -38,15 +38,19 @@ if __name__ == "__main__":
                   logger=logger,
                   wip_limit=args.wip_limit)
 
+    count = 0
     while True:
         try:
-            logger.info("Processing loop started")
-            bot.process()
-            logger.info("Processing loop finished")
+            bot.process_messages()
+            if count > 3000:
+                count = 0
+                bot.send_periodic_update()
+            count += 1
         except Exception as e:
+            logger.exception(e)
             logger.error(e.message)
             slack.send("dan_taylor", "I crashed!!")
             slack.send("dan_taylor", e.message)
         if not args.forever:
             break
-        sleep(300)
+        sleep(0.1)

@@ -13,7 +13,7 @@ BOT_NAME = 'jirabot'
 
 class SlackTests(unittest.TestCase):
     def setUp(self):
-        self.slack = SlackClient('???')
+        self.slack = SlackClient('??')
 
     def test_connect(self):
         api_call = self.slack.api_call("users.list")
@@ -41,11 +41,12 @@ class SlackTests(unittest.TestCase):
 
     def test_read_some_messages(self):
         if self.slack.rtm_connect():
+            print "connected"
             while True:
                 msgs = self.slack.rtm_read()
                 for m in msgs:
                     print m
-                time.sleep(1)
+                time.sleep(0.1)
 
     def test_sending_a_message(self):
         print self.slack.api_call(
@@ -56,15 +57,20 @@ class SlackTests(unittest.TestCase):
             icon_emoji=':office:'
         )
 
-    def test_join_a_channel(self):
-        channels_call = self.slack.api_call("channels.list")
-        if channels_call.get("ok"):
-            channels = channels_call.get('channels')
-            for c in channels:
-                print c
-            print filter(lambda c: c.get("name") == "dan_test", channels)
+    def test_list_channels(self):
+        groups = self.slack.api_call("groups.list").get('groups')
+        channels = groups + self.slack.api_call("channels.list").get('channels')
+        for c in channels:
+            print c
+        print filter(lambda c: c.get("name") == "dan_test", channels)[0]["id"]
 
-            # print self.slack.api_call("channels.join", name="dan_test")
+    def test_list_users(self):
+        users = self.slack.api_call("users.list")
+        print users
+        users = users.get('members')
+        for u in users:
+            print u
+        print filter(lambda c: c.get("name") == "jirabot", users)[0]["id"]
 
     def test_sending_an_attachment_message(self):
         print self.slack.api_call(
