@@ -58,6 +58,9 @@ class Jira:
     def created_in_last_n_days(self, days):
         return Jira(self.server, self.join('created >= -{0}d'.format(days)), logger=self.logger)
 
+    def order_by(self, field):
+        return Jira(self.server, self.jql + ' order by {0}'.format(field), logger=self.logger)
+
     def get_issues(self):
         if self.jira is None:
             options = {

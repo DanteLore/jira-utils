@@ -44,6 +44,11 @@ class JiraBot:
                 self.logger.debug("Received command to show backlog")
                 messages.append(self.jira_executor.get_backlog_issues())
             self.logger.debug("Finished processing show command")
+        if "status" in text:
+            if "summary" in text:
+                self.logger.debug("Received command to provide a status summary")
+                messages.append(self.jira_executor.get_status_summary())
+            self.logger.debug("Finished processing status command")
 
         if len(messages) > 0:
             for message in messages:
@@ -63,6 +68,7 @@ class JiraBot:
                     ":two: 'show to do'\n" +
                     ":three: 'show in progress'\n" +
                     ":four: 'show backlog'\n" +
+                    ":five: 'status summary'\n" +
                     "and always remember to mention me by name!"
         }
 

@@ -45,10 +45,13 @@ class MockJira:
         new_issues = filter(lambda i: i.fields.id in ids, self.issues)
         return MockJira(issue_objects=new_issues)
 
-    def with_project(self, project):
+    def with_project(self, _):
         return self
 
-    def with_label(self, label):
+    def with_label(self, _):
+        return self
+
+    def order_by(self, _):
         return self
 
     def created_in_last_n_days(self, days):

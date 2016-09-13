@@ -10,7 +10,7 @@ class MessageToJiraAttachmentConverter:
     def get_attachments(self, message):
         ids = self.pattern.findall(message)
         if len(ids) > 0:
-            issues = self.jira.with_these_ids(ids).get_issues()
+            issues = self.jira.with_these_ids(ids).order_by("Rank").get_issues()
 
             for issue in issues:
                 yield {

@@ -4,6 +4,10 @@ from jira_utils.jira_utils import Jira
 
 
 class JiraJqlGenerationTests(unittest.TestCase):
+    def order_by_rank(self):
+        jira = Jira("").order_by("Rank")
+        self.assertEqual('order by rank', jira.jql)
+
     def test_project_filter(self):
         jira = Jira("").with_project("TEST")
         self.assertEqual('project = "TEST"', jira.jql)

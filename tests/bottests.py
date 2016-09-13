@@ -212,3 +212,16 @@ class JiraBotTests(unittest.TestCase):
         bot.process_messages()
         self.assertEqual(1, len(slack.outgoing_messages))
         self.assertTrue("XXX-7" in slack.outgoing_messages[0]["message"])
+
+    @freeze_time("2016-08-10 09:00:00")
+    def test_request_status_summary(self):
+        jira = MockJira(issues=self.get_test_issue_set())
+        slack = MockSlack()
+        bot = JiraBot(jira, slack, "AAA", "LABEL", "#things", logger=self.logger)
+        slack.add_incoming({u'text': u'<@BOTID> status summary'})
+        bot.process_messages()
+        self.assertEqual(1, len(slack.outgoing_messages))
+        msg = slack.outgoing_messages[0]["message"].lower()
+        self.assertTrue("backlog: *3*" in msg)
+        self.assertTrue("to do: *1*" in msg)
+        self.assertTrue("in progress: *2*" in msg)
