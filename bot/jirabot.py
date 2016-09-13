@@ -34,7 +34,7 @@ class JiraBot:
         self.wip_limit = wip_limit
         self.jira = jira.with_project(self.project).with_label(self.label)
 
-        self.warning_detector = JiraWarningDetector(jira, project, label, self.logger, wip_limit)
+        self.warning_detector = JiraWarningDetector(self.jira, project, label, self.logger, wip_limit)
         self.jira_id_to_attachment_converter = MessageToJiraAttachmentConverter(self.jira)
 
     def process_messages(self):
@@ -50,46 +50,59 @@ class JiraBot:
                 self.process_message_to_me(text, user)
 
     def process_message_to_me(self, text, user):
+        messages = []
+
         if "show" in text:
             if "warnings" in text or "errors" in text:
                 self.logger.debug("Received command to show warnings")
-                self.send_warnings(force=True)
+                messages += self.get_warnings()
             if "new issues" in text or "new cards" in text or "new tickets" in text or "new jiras" in text:
                 self.logger.debug("Received command to show new issues")
-                self.notify_new_issues_summary(force=True)
+                messages.append(self.get_new_issues_summary())
             if "in progress" in text:
                 self.logger.debug("Received command to show in progress issues")
-                self.notify_in_progress_issues(force=True)
+                messages.append(self.get_in_progress_issues())
             if "to do" in text:
                 self.logger.debug("Received command to show to do list")
-                self.notify_to_do_issues(force=True)
+                messages.append(self.get_to_do_issues())
             self.logger.debug("Finished processing show command")
+
+        if len(messages) > 0:
+            for message in messages:
+                self.send(self.channel, message, force=True)
         else:
             self.send(self.channel, "Not sure what you mean by that <@{0}>, here's what I can do".format(user),
                       force=True, attachments=[self.get_help_attachment()])
 
     def get_help_attachment(self):
         return {
-                "fallback": "I can do all sorts!",
-                "pretext": "",
-                "title": "I can do all sorts!",
-                "title_link": "",
-                "text": "Ask me to:\n:one: 'show warnings'\n:two: 'show to do'\n:three: 'show in progress'\nand always remember to mention me by name!"
-            }
+            "fallback": "I can do all sorts!",
+            "pretext": "",
+            "title": "I can do all sorts!",
+            "title_link": "",
+            "text": "Ask me to:\n" +
+                    ":one: 'show warnings'\n" +
+                    ":two: 'show to do'\n" +
+                    ":three: 'show in progress'\n" +
+                    "and always remember to mention me by name!"
+        }
 
     def send_periodic_update(self):
-        self.send_warnings(force=False)
-        self.notify_new_issues_on_backlog(force=False)
+        messages = self.get_warnings()
+        messages += self.get_new_issues_on_backlog()
+        for message in messages:
+            self.send(self.channel, message, force=False)
 
-    def send_warnings(self, force=False):
+    def get_warnings(self):
         warnings = self.warning_detector.find_warnings()
 
         if len(warnings) == 0:
-            self.send(self.channel, "There are no warnings. It's all good!", force)
-            self.send(self.channel, ":partyparrot:", force)
+            return [
+                "There are no warnings. It's all good!",
+                ":partyparrot:"
+            ]
         else:
-            for warning in warnings:
-                self.send(self.channel, warning, force)
+            return warnings
 
     def send(self, recipient, message, force, attachments=None):
         msg = {"recipient": recipient, "message": message}
@@ -99,35 +112,36 @@ class JiraBot:
             self.history.append(msg)
             self.slack.send(recipient, message, attachments)
 
-    def notify_new_issues_on_backlog(self, force):
+    def get_new_issues_on_backlog(self):
         issues = self.jira.status_is_not(["in progress", "done", "closed"]).created_in_last_n_days(1).get_issues()
         for issue in issues:
             message = ':memo: New issue {0} added'.format(issue)
-            self.send(self.channel, message, force)
+            yield message
 
-    def notify_new_issues_summary(self, force):
+    def get_new_issues_summary(self):
         issues = self.jira.status_is_not(["in progress", "done", "closed"]).created_in_last_n_days(1).get_issues()
         ids = map(lambda i: "{0}".format(i), issues)
         if len(ids):
-            message = ':memo: The following *new issues* issues have been added in the last 24 hours: {0}'.format(', '.join(ids))
+            message = ':memo: The following *new issues* issues have been added in the last 24 hours: {0}'.format(
+                ', '.join(ids))
         else:
             message = ':memo: No issues added in the last 24 hours'
-        self.send(self.channel, message, force)
+        return message
 
-    def notify_in_progress_issues(self, force):
+    def get_in_progress_issues(self):
         issues = self.jira.status_is("in progress").get_issues()
         ids = map(lambda i: "{0}".format(i), issues)
         if len(ids) > 0:
             message = ':memo: The following issues are currently *in progress*: {0}'.format(', '.join(ids))
         else:
             message = ':memo: Nothing currently marked as in progress!'
-        self.send(self.channel, message, force)
+        return message
 
-    def notify_to_do_issues(self, force):
+    def get_to_do_issues(self):
         issues = self.jira.status_is("to do").get_issues()
         ids = map(lambda i: "{0}".format(i), issues)
         if len(ids) > 0:
             message = ':memo: The following issues are currently on the *to do list*: {0}'.format(', '.join(ids))
         else:
             message = ':memo: The To Do list is empty!'
-        self.send(self.channel, message, force)
+        return message

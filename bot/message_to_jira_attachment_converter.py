@@ -9,16 +9,17 @@ class MessageToJiraAttachmentConverter:
 
     def get_attachments(self, message):
         ids = self.pattern.findall(message)
-        issues = self.jira.with_these_ids(ids).get_issues()
+        if len(ids) > 0:
+            issues = self.jira.with_these_ids(ids).get_issues()
 
-        for issue in issues:
-            yield {
-                "fallback": "{0}: {1}".format(issue, issue.fields.summary),
-                "pretext": "",
-                "title": "{0}: {1}".format(issue, issue.fields.summary),
-                "title_link": self.format_str.format(issue),
-                "text": "Assigned: {0} Status: {1}".format(issue.fields.assignee or "-", issue.fields.status)
-            }
+            for issue in issues:
+                yield {
+                    "fallback": "{0}: {1}".format(issue, issue.fields.summary),
+                    "pretext": "",
+                    "title": "{0}: {1}".format(issue, issue.fields.summary),
+                    "title_link": self.format_str.format(issue),
+                    "text": "Assigned: {0} Status: {1}".format(issue.fields.assignee or "-", issue.fields.status)
+                }
 
     def apply(self, message):
         return list(self.get_attachments(message))
