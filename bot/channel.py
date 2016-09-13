@@ -34,7 +34,7 @@ class Channel:
         for message in messages:
             text = message["text"].lower()
             user = message.get("user") or ""
-            self.logger.debug("Processing message: {0}".format(text))
+            self.logger.debug(u"Processing message: {0}".format(text))
             if my_id in text:
                 self.logger.debug("I was mentioned")
                 yield text, user
