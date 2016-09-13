@@ -35,3 +35,12 @@ class JiraQueryExecutor:
         else:
             message = ':memo: The To Do list is empty!'
         return message
+
+    def get_backlog_issues(self):
+        issues = self.jira.status_is("backlog").get_issues()
+        ids = map(lambda i: "{0}".format(i), issues)
+        if len(ids) > 0:
+            message = ':memo: The following issues are currently on the *backlog*: {0}'.format(', '.join(ids))
+        else:
+            message = ':memo: The backlog is empty!'
+        return message

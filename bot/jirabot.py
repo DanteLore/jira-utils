@@ -40,6 +40,9 @@ class JiraBot:
             if "to do" in text:
                 self.logger.debug("Received command to show to do list")
                 messages.append(self.jira_executor.get_to_do_issues())
+            if "backlog" in text:
+                self.logger.debug("Received command to show backlog")
+                messages.append(self.jira_executor.get_backlog_issues())
             self.logger.debug("Finished processing show command")
 
         if len(messages) > 0:
@@ -59,6 +62,7 @@ class JiraBot:
                     ":one: 'show warnings'\n" +
                     ":two: 'show to do'\n" +
                     ":three: 'show in progress'\n" +
+                    ":four: 'show backlog'\n" +
                     "and always remember to mention me by name!"
         }
 
