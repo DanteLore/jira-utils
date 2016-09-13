@@ -26,19 +26,6 @@ class SlackTests(unittest.TestCase):
         else:
             print("could not find bot user with the name " + BOT_NAME)
 
-    def test_get_history_for_channel(self):
-        # slacker = Slacker('xoxb-68771251987-j7q9lApp7dlsI3kWDz49FFgR')
-        # response = slacker.channels.list()
-        # for c in response.body['channels']:
-        #    print '{0} {1}'.format(c['name'], c['id'])
-        response = self.slack.api_call(
-            "channels.history",
-            channel="C02C5758Z",
-            username='@jirabot'
-        )
-        for x in response['messages']:
-            print x['text']
-
     def test_read_some_messages(self):
         if self.slack.rtm_connect():
             print "connected"

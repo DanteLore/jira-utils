@@ -1,6 +1,7 @@
 import logging
 from collections import deque
 
+from bot.jira_query_executor import JiraQueryExecutor
 from bot.message_to_jira_attachment_converter import MessageToJiraAttachmentConverter
 from bot.warning_detector import JiraWarningDetector
 
@@ -36,6 +37,7 @@ class JiraBot:
 
         self.warning_detector = JiraWarningDetector(self.jira, project, label, self.logger, wip_limit)
         self.jira_id_to_attachment_converter = MessageToJiraAttachmentConverter(self.jira)
+        self.jira_executor = JiraQueryExecutor(self.jira)
 
     def process_messages(self):
         my_id = self.bot_id.lower()
@@ -58,13 +60,13 @@ class JiraBot:
                 messages += self.get_warnings()
             if "new issues" in text or "new cards" in text or "new tickets" in text or "new jiras" in text:
                 self.logger.debug("Received command to show new issues")
-                messages.append(self.get_new_issues_summary())
+                messages.append(self.jira_executor.get_new_issues_summary())
             if "in progress" in text:
                 self.logger.debug("Received command to show in progress issues")
-                messages.append(self.get_in_progress_issues())
+                messages.append(self.jira_executor.get_in_progress_issues())
             if "to do" in text:
                 self.logger.debug("Received command to show to do list")
-                messages.append(self.get_to_do_issues())
+                messages.append(self.jira_executor.get_to_do_issues())
             self.logger.debug("Finished processing show command")
 
         if len(messages) > 0:
@@ -89,7 +91,7 @@ class JiraBot:
 
     def send_periodic_update(self):
         messages = self.get_warnings()
-        messages += self.get_new_issues_on_backlog()
+        messages += self.jira_executor.get_new_issues_on_backlog()
         for message in messages:
             self.send(self.channel, message, force=False)
 
@@ -111,37 +113,3 @@ class JiraBot:
             attachments += self.jira_id_to_attachment_converter.apply(message)
             self.history.append(msg)
             self.slack.send(recipient, message, attachments)
-
-    def get_new_issues_on_backlog(self):
-        issues = self.jira.status_is_not(["in progress", "done", "closed"]).created_in_last_n_days(1).get_issues()
-        for issue in issues:
-            message = ':memo: New issue {0} added'.format(issue)
-            yield message
-
-    def get_new_issues_summary(self):
-        issues = self.jira.status_is_not(["in progress", "done", "closed"]).created_in_last_n_days(1).get_issues()
-        ids = map(lambda i: "{0}".format(i), issues)
-        if len(ids):
-            message = ':memo: The following *new issues* issues have been added in the last 24 hours: {0}'.format(
-                ', '.join(ids))
-        else:
-            message = ':memo: No issues added in the last 24 hours'
-        return message
-
-    def get_in_progress_issues(self):
-        issues = self.jira.status_is("in progress").get_issues()
-        ids = map(lambda i: "{0}".format(i), issues)
-        if len(ids) > 0:
-            message = ':memo: The following issues are currently *in progress*: {0}'.format(', '.join(ids))
-        else:
-            message = ':memo: Nothing currently marked as in progress!'
-        return message
-
-    def get_to_do_issues(self):
-        issues = self.jira.status_is("to do").get_issues()
-        ids = map(lambda i: "{0}".format(i), issues)
-        if len(ids) > 0:
-            message = ':memo: The following issues are currently on the *to do list*: {0}'.format(', '.join(ids))
-        else:
-            message = ':memo: The To Do list is empty!'
-        return message
