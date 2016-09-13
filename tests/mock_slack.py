@@ -21,7 +21,7 @@ class MockSlack:
     def get_user_id(self, name):
         return "BOTID"
 
-    def send(self, recipient, message):
+    def send(self, recipient, message, attachments):
         self.logger.info("SLACK SEND: {0}: {1}".format(recipient, message))
         msg = {"recipient": recipient, "message": message}
         self.outgoing_messages.append(msg)

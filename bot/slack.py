@@ -4,9 +4,7 @@ from slackclient import SlackClient
 
 
 class Slack:
-    def __init__(self, key, attachment_converter, logger=None):
-        self.attachment_converter = attachment_converter
-
+    def __init__(self, key, logger=None):
         if logger:
             self.logger = logger
         else:
@@ -52,7 +50,7 @@ class Slack:
         else:
             return None
 
-    def send(self, recipient, message):
+    def send(self, recipient, message, attachments=None):
         self.logger.info("SLACK SEND: {0}: {1}".format(recipient, message))
 
         self.slack.api_call(
@@ -61,5 +59,5 @@ class Slack:
             text=message,
             username='@jirabot',
             icon_emoji=':office:',
-            attachments=self.attachment_converter.apply(message)
+            attachments=attachments or []
         )

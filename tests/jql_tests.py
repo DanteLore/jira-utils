@@ -12,6 +12,10 @@ class JiraJqlGenerationTests(unittest.TestCase):
         jira = Jira("").with_id("XXX-470")
         self.assertEqual('id = "XXX-470"', jira.jql)
 
+    def test_query_by_ids(self):
+        jira = Jira("").with_these_ids(["XXX-470", "YYY-111"])
+        self.assertEqual('id in ("XXX-470", "YYY-111")', jira.jql)
+
     def test_label_filter(self):
         jira = Jira("").with_label("LAB1")
         self.assertEqual('labels in ("LAB1")', jira.jql)

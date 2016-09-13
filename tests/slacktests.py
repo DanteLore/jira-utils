@@ -13,7 +13,7 @@ BOT_NAME = 'jirabot'
 
 class SlackTests(unittest.TestCase):
     def setUp(self):
-        self.slack = SlackClient('??')
+        self.slack = SlackClient('???')
 
     def test_connect(self):
         api_call = self.slack.api_call("users.list")
@@ -52,7 +52,7 @@ class SlackTests(unittest.TestCase):
         print self.slack.api_call(
             "chat.postMessage",
             channel="dan_test",
-            text="Hello from Python! :tada:",
+            text="Hello from Python! <@U1LSJ8JGY> :tada:\nI'm awesome!",
             username='@jirabot',
             icon_emoji=':office:'
         )

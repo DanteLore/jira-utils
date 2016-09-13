@@ -2,7 +2,7 @@ import argparse
 import logging
 from time import sleep
 
-from bot.jirabot import MessageToJiraAttachmentConverter, JiraBot
+from bot.jirabot import JiraBot
 from bot.slack import Slack
 from jira_utils.jira_utils import Jira
 
@@ -26,9 +26,8 @@ if __name__ == "__main__":
     logger.setLevel(args.log_level)
     logger.addHandler(stream_handler)
 
-    jira = Jira(args.jira)
-    attachment_converter = MessageToJiraAttachmentConverter(jira)
-    slack = Slack(args.slack_key, attachment_converter, logger)
+    jira = Jira(args.jira, logger=logger)
+    slack = Slack(args.slack_key, logger=logger)
 
     bot = JiraBot(jira=jira,
                   slack=slack,
@@ -38,6 +37,7 @@ if __name__ == "__main__":
                   logger=logger,
                   wip_limit=args.wip_limit)
 
+    slack.send(args.channel, ":tada: I just restarted. Hello!")
     count = 0
     while True:
         try:

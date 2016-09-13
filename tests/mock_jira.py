@@ -41,6 +41,10 @@ class MockJira:
         new_issues = filter(lambda i: i.fields.id == id, self.issues)
         return MockJira(issue_objects=new_issues)
 
+    def with_these_ids(self, ids):
+        new_issues = filter(lambda i: i.fields.id in ids, self.issues)
+        return MockJira(issue_objects=new_issues)
+
     def with_project(self, project):
         return self
 

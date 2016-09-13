@@ -3,7 +3,8 @@ import unittest
 
 from freezegun import freeze_time
 
-from bot.jirabot import JiraBot, MessageToJiraAttachmentConverter
+from bot.jirabot import JiraBot
+from bot.message_to_jira_attachment_converter import MessageToJiraAttachmentConverter
 from tests.mock_jira import MockJira
 from tests.mock_slack import MockSlack
 
@@ -16,7 +17,7 @@ class JiraBotTests(unittest.TestCase):
         self.logger.setLevel("DEBUG")
         self.logger.addHandler(stream_handler)
 
-    def test_no_messages_when_nothing_interesting_happening(self):
+    def test_messages_when_nothing_interesting_happening(self):
         jira = MockJira(issues=[
             {"id": "XXX-1", "summary": "My first Jira", "status": "Backlog"},
             {"id": "XXX-2", "summary": "My second Jira", "status": "Backlog"},
@@ -24,7 +25,8 @@ class JiraBotTests(unittest.TestCase):
         slack = MockSlack()
         bot = JiraBot(jira, slack, "XXX", "LABEL", 3)
         bot.send_periodic_update()
-        self.assertEqual(len(slack.outgoing_messages), 0)
+        self.assertEqual(len(slack.outgoing_messages), 2)
+        self.assertEqual(":partyparrot:", slack.outgoing_messages[1]["message"])
 
     def test_message_sent_if_issue_assigned_but_not_in_progress(self):
         jira = MockJira(issues=[
@@ -81,8 +83,10 @@ class JiraBotTests(unittest.TestCase):
         slack = MockSlack()
         bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever")
         bot.send_periodic_update()
-        self.assertEqual(1, len(slack.outgoing_messages))
-        self.assertEqual(':memo: New issue AAA-2 added', slack.outgoing_messages[0]["message"])
+        self.assertEqual(3, len(slack.outgoing_messages))
+        self.assertEqual("There are no warnings. It's all good!", slack.outgoing_messages[0]["message"])
+        self.assertEqual(':partyparrot:', slack.outgoing_messages[1]["message"])
+        self.assertEqual(':memo: New issue AAA-2 added', slack.outgoing_messages[2]["message"])
 
     @freeze_time("2016-08-10 09:00:00")
     def test_multiple_new_issues_in_backlog_notified_on_channel(self):
@@ -94,9 +98,11 @@ class JiraBotTests(unittest.TestCase):
         slack = MockSlack()
         bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever")
         bot.send_periodic_update()
-        self.assertEqual(2, len(slack.outgoing_messages))
-        self.assertEqual(':memo: New issue AAA-3 added', slack.outgoing_messages[0]["message"])
-        self.assertEqual(':memo: New issue AAA-2 added', slack.outgoing_messages[1]["message"])
+        self.assertEqual(4, len(slack.outgoing_messages))
+        self.assertEqual("There are no warnings. It's all good!", slack.outgoing_messages[0]["message"])
+        self.assertEqual(':partyparrot:', slack.outgoing_messages[1]["message"])
+        self.assertEqual(':memo: New issue AAA-3 added', slack.outgoing_messages[2]["message"])
+        self.assertEqual(':memo: New issue AAA-2 added', slack.outgoing_messages[3]["message"])
 
     @freeze_time("2016-08-10 09:00:00")
     def test_new_issues_not_repeated_in_channel(self):
@@ -108,7 +114,7 @@ class JiraBotTests(unittest.TestCase):
         bot = JiraBot(jira, slack, "AAA", "LABEL", "#things")
         bot.send_periodic_update()
         bot.send_periodic_update()
-        self.assertEqual(1, len(slack.outgoing_messages))
+        self.assertEqual(3, len(slack.outgoing_messages))
 
     def test_no_attachments_added_for_string_with_no_jira_ids(self):
         attachments = MessageToJiraAttachmentConverter(jira=MockJira()).apply(
@@ -135,6 +141,15 @@ class JiraBotTests(unittest.TestCase):
             {"id": "XXX-6", "summary": "My sixth Jira", "assignee": None, "status": "Backlog", "created": u'2016-08-10T07:55:00.000+0100'},
             {"id": "XXX-7", "summary": "My seventh Jira", "assignee": "Donald Trump", "status": "Backlog", "created": u'2016-08-08T14:50:36.000+0100'}
         ]
+
+    def test_unknown_command(self):
+        jira = MockJira(issues=[])
+        slack = MockSlack()
+        bot = JiraBot(jira, slack, "AAA", "LABEL", "#things", logger=self.logger)
+        slack.add_incoming({u'text': u'<@BOTID> herrings are obfuscation cheese', u'user': u'USER_ID'})
+        bot.process_messages()
+        self.assertEqual(1, len(slack.outgoing_messages))
+        self.assertTrue("<@USER_ID>" in slack.outgoing_messages[0]["message"])
 
     @freeze_time("2016-08-10 09:00:00")
     def test_request_to_show_everything(self):
