@@ -23,7 +23,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "XXX-2", "summary": "My second Jira", "status": "Backlog"},
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "XXX", "LABEL", 3)
+        bot = JiraBot(jira, slack, "XXX", "LABEL", 3, logger=self.logger)
         bot.send_periodic_update()
         self.assertEqual(len(slack.outgoing_messages), 2)
         self.assertEqual(":partyparrot:", slack.outgoing_messages[1]["message"])
@@ -35,7 +35,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "XXX-3", "summary": "My third Jira", "assignee": "Fred Jones", "status": "In Progress"},
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_name", 3)
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_name", 3, logger=self.logger)
         bot.send_periodic_update()
         self.assertEqual(len(slack.outgoing_messages), 1)
         self.assertEqual("#channel_name", slack.outgoing_messages[0]["recipient"])
@@ -49,7 +49,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "XXX-3", "summary": "My third Jira", "assignee": "Fred Jones", "status": "In Progress"},
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "XXX", "LABEL", "#the_channel")
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#the_channel", logger=self.logger)
         bot.send_periodic_update()
         self.assertEqual(1, len(slack.outgoing_messages))
         self.assertEqual("#the_channel", slack.outgoing_messages[0]["recipient"])
@@ -66,7 +66,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "XXX-6", "summary": "My sixth Jira", "assignee": "Lazy Susan", "status": "In Progress"},
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "XXX", "LABEL", "#chan1", 3)
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#chan1", 3, logger=self.logger)
         bot.send_periodic_update()
         self.assertEqual(len(slack.outgoing_messages), 1)
         self.assertEqual("#chan1", slack.outgoing_messages[0]["recipient"])
@@ -81,7 +81,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "AAA-1", "summary": "I am not new", "status": "Backlog", "created": u'2016-08-08T14:50:36.000+0100'}
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever")
+        bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever", logger=self.logger)
         bot.send_periodic_update()
         self.assertEqual(3, len(slack.outgoing_messages))
         self.assertEqual("There are no warnings. It's all good!", slack.outgoing_messages[0]["message"])
@@ -96,7 +96,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "AAA-1", "summary": "I am not new", "status": "Backlog", "created": u'2016-08-08T14:50:36.000+0100'}
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever")
+        bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever", logger=self.logger)
         bot.send_periodic_update()
         self.assertEqual(4, len(slack.outgoing_messages))
         self.assertEqual("There are no warnings. It's all good!", slack.outgoing_messages[0]["message"])
@@ -111,7 +111,7 @@ class JiraBotTests(unittest.TestCase):
             {"id": "AAA-1", "summary": "I am not new", "status": "Backlog", "created": u'2016-08-08T14:50:36.000+0100'}
         ])
         slack = MockSlack()
-        bot = JiraBot(jira, slack, "AAA", "LABEL", "#things")
+        bot = JiraBot(jira, slack, "AAA", "LABEL", "#things", logger=self.logger)
         bot.send_periodic_update()
         bot.send_periodic_update()
         self.assertEqual(3, len(slack.outgoing_messages))
@@ -225,3 +225,8 @@ class JiraBotTests(unittest.TestCase):
         self.assertTrue("backlog: *3*" in msg)
         self.assertTrue("to do: *1*" in msg)
         self.assertTrue("in progress: *2*" in msg)
+
+    def test_fuzzy_matching(self):
+        from fuzzywuzzy import process
+        name, _ = process.extractOne("Dan Taylor", ["Daniel Taylor", "Danielle Smith", "Dan Cheesehammer", "Dave Taylor"])
+        self.assertEqual("Daniel Taylor", name)

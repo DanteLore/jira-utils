@@ -44,6 +44,7 @@ class JiraBot:
                 self.logger.debug("Received command to show backlog")
                 messages.append(self.jira_executor.get_backlog_issues())
             self.logger.debug("Finished processing show command")
+
         if "status" in text:
             if "summary" in text:
                 self.logger.debug("Received command to provide a status summary")

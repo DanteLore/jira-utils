@@ -1,6 +1,8 @@
 import time
 import unittest
 
+import unicodedata
+from fuzzywuzzy import process
 from slackclient import SlackClient
 from slacker import Slacker
 
@@ -76,3 +78,32 @@ class SlackTests(unittest.TestCase):
                 }
             ]
         )
+
+    def test_name_matching(self):
+        users = self.slack.api_call("users.list")
+        users = users.get('members')
+
+        users = ({
+                     "fullname": unicodedata.normalize('NFKD', u.get("real_name") or u"").encode('ascii', 'ignore'),
+                     "id": u.get("id") or "",
+                     "name": u.get("name") or ""
+                 } for u in users)
+
+        users = [u for u in users if u["fullname"] and u["id"] and u["name"]]
+
+        cutoff = 80
+
+        name, _ = process.extractOne("Dan Taylor", users, score_cutoff=cutoff)
+        self.assertEqual("dan_taylor", name.get("name"))
+
+        name, _ = process.extractOne("Cody.Barzey-Francois", users, score_cutoff=cutoff)
+        self.assertEqual("tachyon", name.get("name"))
+
+        name, _ = process.extractOne("Anthony Blanchflower", users, score_cutoff=cutoff)
+        self.assertEqual("tonyblanch", name.get("name"))
+
+        name, _ = process.extractOne("Bhavana Bhosale", users, score_cutoff=cutoff)
+        self.assertEqual("bhavanab", name.get("name"))
+
+        name, _ = process.extractOne("Amarnath.Kallam", users, score_cutoff=cutoff)
+        self.assertEqual("amarnath.kallam", name.get("name"))

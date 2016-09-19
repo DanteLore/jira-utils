@@ -79,3 +79,6 @@ class MockJira:
 
     def get_issues(self):
         return self.issues
+
+    def count_issues(self):
+        return len(self.issues)

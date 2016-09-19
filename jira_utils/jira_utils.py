@@ -61,6 +61,9 @@ class Jira:
     def order_by(self, field):
         return Jira(self.server, self.jql + ' order by {0}'.format(field), logger=self.logger)
 
+    def count_issues(self):
+        return len(self.get_issues())
+
     def get_issues(self):
         if self.jira is None:
             options = {
