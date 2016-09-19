@@ -16,7 +16,7 @@ class JiraBot:
             self.logger.addHandler(logging.StreamHandler())
 
         jira = jira.with_project(project).with_label(label)
-        self.warning_detector = JiraWarningDetector(jira, project, label, self.logger, wip_limit)
+        self.warning_detector = JiraWarningDetector(jira, slack, project, label, self.logger, wip_limit)
         self.jira_executor = JiraQueryExecutor(jira)
         self.channel = Channel(slack, channel, MessageToJiraAttachmentConverter(jira), self.logger)
 

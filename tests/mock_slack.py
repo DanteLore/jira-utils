@@ -2,9 +2,10 @@ import logging
 
 
 class MockSlack:
-    def __init__(self, incoming_messages=None):
+    def __init__(self, incoming_messages=None, name_lookup=None):
         self.incoming_messages = incoming_messages or []
         self.outgoing_messages = []
+        self.name_lookup = name_lookup or {}
 
     def read_next_messages_for_channel(self, channel_id):
         return self.incoming_messages
@@ -17,6 +18,9 @@ class MockSlack:
 
     def get_user_id(self, name):
         return "BOTID"
+
+    def search_user_id(self, name):
+        return self.name_lookup.get(name)
 
     def send(self, recipient, message, attachments):
         msg = {"recipient": recipient, "message": message}

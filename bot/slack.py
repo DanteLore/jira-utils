@@ -1,5 +1,8 @@
 import logging
 
+import unicodedata
+
+from fuzzywuzzy import process
 from slackclient import SlackClient
 
 
@@ -42,6 +45,17 @@ class Slack:
             return chan["id"]
         else:
             return None
+
+    def search_user_id(self, search_name):
+        users = self.slack.api_call("users.list").get('members')
+        users = ({
+                     "fullname": unicodedata.normalize('NFKD', u.get("real_name") or u"").encode('ascii', 'ignore'),
+                     "id": u.get("id") or "",
+                     "name": u.get("name") or ""
+                 } for u in users)
+        users = [u for u in users if u["fullname"] and u["id"] and u["name"]]
+        found, _ = process.extractOne(search_name, users, score_cutoff=80)
+        return found.get("id") or None
 
     def get_user_id(self, name):
         user = next((u for u in self.all_users() if u["name"].lower() == name.lower()), None)

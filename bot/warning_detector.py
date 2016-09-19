@@ -2,11 +2,12 @@ from itertools import groupby
 
 
 class JiraWarningDetector:
-    def __init__(self, jira, project, label, logger, wip_limit=5):
+    def __init__(self, jira, slack, project, label, logger, wip_limit=5):
         self.wip_limit = wip_limit
         self.label = label
         self.project = project
         self.jira = jira
+        self.slack = slack
         self.logger = logger
 
     def find_warnings(self):
@@ -21,12 +22,20 @@ class JiraWarningDetector:
             ids = map(lambda x: "{0}".format(x), list(v))
             self.logger.debug("{0} {1}".format(k, len(ids)))
             if len(ids) >= self.wip_limit:
-                msg = ":warning: *{0}* currently has {1} jira issues in progress. That's too many. Here's a list: {2}".format(
-                    k,
+                msg = ":warning: {0} currently has {1} jira issues in progress. That's too many. Here's a list: {2}".format(
+                    self.format_user_mention(k),
                     len(ids),
                     ", ".join(ids)
                 )
                 yield msg
+
+    def format_user_mention(self, user_name):
+        user_id = self.slack.search_user_id(user_name)
+        if user_id:
+            user = "<@{0}>".format(user_id)
+        else:
+            user = "*{0}*".format(user_name)
+        return user
 
     def assigned_but_not_in_progress(self):
         issues = self.jira \
@@ -35,9 +44,10 @@ class JiraWarningDetector:
             .get_issues()
         for issue in issues:
             assignee = issue.fields.assignee
-            message = ':warning: {0} is assigned to *{1}* but still in the {2} state'.format(issue,
-                                                                                             assignee,
-                                                                                             issue.fields.status)
+            message = ':warning: {0} is assigned to {1} but still in the {2} state'.format(
+                issue,
+                self.format_user_mention(assignee),
+                issue.fields.status)
             yield message
 
     def in_progress_but_not_assigned(self):

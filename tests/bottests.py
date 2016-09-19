@@ -226,7 +226,15 @@ class JiraBotTests(unittest.TestCase):
         self.assertTrue("to do: *1*" in msg)
         self.assertTrue("in progress: *2*" in msg)
 
-    def test_fuzzy_matching(self):
-        from fuzzywuzzy import process
-        name, _ = process.extractOne("Dan Taylor", ["Daniel Taylor", "Danielle Smith", "Dan Cheesehammer", "Dave Taylor"])
-        self.assertEqual("Daniel Taylor", name)
+    def test_name_lookups_for_mentions(self):
+        jira = MockJira(issues=[
+            {"id": "XXX-1", "summary": "My first Jira", "assignee": "Fred Bloggs", "status": "Backlog"}
+        ])
+        slack = MockSlack(name_lookup={"Fred Bloggs": "BLOGGSID"})
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_name", 3, logger=self.logger)
+        bot.send_periodic_update()
+        self.assertEqual(len(slack.outgoing_messages), 1)
+        self.assertEqual("#channel_name", slack.outgoing_messages[0]["recipient"])
+        self.assertEqual(':warning: XXX-1 is assigned to <@BLOGGSID> but still in the Backlog state',
+                         slack.outgoing_messages[0]["message"])
+
