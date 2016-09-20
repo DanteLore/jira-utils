@@ -116,6 +116,23 @@ class JiraBotTests(unittest.TestCase):
         bot.send_periodic_update()
         self.assertEqual(3, len(slack.outgoing_messages))
 
+    @freeze_time("2016-08-10 09:00:00")
+    def test_in_progress_for_too_long(self):
+        # Note that the mock Jira uses Created Date for filtering - since it doesn't have state change knowledge
+        # We're testing that the correct number of days is passed and that the messages are created, not the JQL itself.
+        jira = MockJira(issues=[
+            {"id": "AAA-3", "assignee": "Bad Gary", "summary": "I'm new too", "status": "In Progress", "created": u'2016-08-10T07:58:00.000+0100'},
+            {"id": "AAA-2", "assignee": "Bad Gary", "summary": "I am new-ish", "status": "In Progress", "created": u'2016-08-07T07:55:00.000+0100'},
+            {"id": "AAA-1", "assignee": "Bad Gary", "summary": "I've been in progress for ages!", "status": "In Progress", "created": u'2016-08-01T14:50:36.000+0100'}
+        ])
+        slack = MockSlack()
+        bot = JiraBot(jira, slack, "AAA", "LABEL", "#whatever", logger=self.logger, wip_limit=10, wip_time_limit=7)
+        bot.send_periodic_update()
+        self.assertEqual(1, len(slack.outgoing_messages))
+        self.assertEqual("#whatever", slack.outgoing_messages[0]["recipient"])
+        self.assertEqual(":clock2: AAA-1 has been in progress for longer than 7 days. Is it blocked, *Bad Gary*?",
+                         slack.outgoing_messages[0]["message"])
+
     def test_no_attachments_added_for_string_with_no_jira_ids(self):
         attachments = MessageToJiraAttachmentConverter(jira=MockJira()).apply(
             "This text doesn't contain any Jira IDs")
@@ -237,4 +254,3 @@ class JiraBotTests(unittest.TestCase):
         self.assertEqual("#channel_name", slack.outgoing_messages[0]["recipient"])
         self.assertEqual(':warning: XXX-1 is assigned to <@BLOGGSID> but still in the Backlog state',
                          slack.outgoing_messages[0]["message"])
-

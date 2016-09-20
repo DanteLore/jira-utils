@@ -60,6 +60,14 @@ class MockJira:
         new_issues = filter(lambda i: i.fields.created is not None and dateutil.parser.parse(i.fields.created) >= threshold, self.issues)
         return MockJira(issue_objects=new_issues)
 
+    def in_progress_for_n_days(self, days):
+        # Since we're unable to access the status change gracefully in the mock, use Created Date instead
+        # We're not testing the queries anyway - just the Bot logic!
+        threshold = datetime.utcnow() - timedelta(days=days)
+        threshold = pytz.UTC.localize(threshold)
+        new_issues = filter(lambda i: i.fields.created is not None and dateutil.parser.parse(i.fields.created) <= threshold, self.issues)
+        return MockJira(issue_objects=new_issues).status_is("In Progress")
+
     def status_is_not(self, statuses):
         lower_statuses = map(lambda s: s.lower(), statuses)
         new_issues = filter(lambda i: i.fields.status.lower() not in lower_statuses, self.issues)

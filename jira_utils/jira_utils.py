@@ -72,3 +72,12 @@ class Jira:
             self.jira = JIRA(options)
         self.logger.debug("Executing JQL query: '{0}'".format(self.jql))
         return self.jira.search_issues(self.jql, maxResults=100)
+
+    def resolved_n_days_ago(self, day):
+        fragment = "resolutionDate >= startOfDay(-{0}d) and resolutionDate < endOfDay(-{0}d)".format(day)
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
+    def in_progress_for_n_days(self, days):
+        fragment = 'status changed to "In Progress" before -{0}d'.format(days)
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+

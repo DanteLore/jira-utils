@@ -15,7 +15,7 @@ BOT_NAME = 'jirabot'
 
 class SlackTests(unittest.TestCase):
     def setUp(self):
-        self.slack = SlackClient('???')
+        self.slack = SlackClient('??')
 
     def test_connect(self):
         api_call = self.slack.api_call("users.list")
@@ -73,7 +73,7 @@ class SlackTests(unittest.TestCase):
                     "pretext": "New Jira added",
                     "title": "XXX-123: Can't reset my password",
                     "title_link": "https://logicalgenetics.com",
-                    "text": "This is the description of the issue about the changing password thing",
+                    "text": "This is the description of the issue about the changing password thing <@U20NP7DV1>",
                     "color": "#7CD197"
                 }
             ]

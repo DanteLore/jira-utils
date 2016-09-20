@@ -7,7 +7,7 @@ from bot.warning_detector import JiraWarningDetector
 
 
 class JiraBot:
-    def __init__(self, jira, slack, project, label, channel, wip_limit=5, logger=None):
+    def __init__(self, jira, slack, project, label, channel, wip_limit=5, wip_time_limit = 7, logger=None):
         if logger:
             self.logger = logger
         else:
@@ -16,7 +16,7 @@ class JiraBot:
             self.logger.addHandler(logging.StreamHandler())
 
         jira = jira.with_project(project).with_label(label)
-        self.warning_detector = JiraWarningDetector(jira, slack, project, label, self.logger, wip_limit)
+        self.warning_detector = JiraWarningDetector(jira, slack, project, label, self.logger, wip_limit, wip_time_limit)
         self.jira_executor = JiraQueryExecutor(jira)
         self.channel = Channel(slack, channel, MessageToJiraAttachmentConverter(jira), self.logger)
 
