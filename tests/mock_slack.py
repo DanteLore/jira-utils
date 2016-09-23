@@ -5,6 +5,7 @@ class MockSlack:
     def __init__(self, incoming_messages=None, name_lookup=None):
         self.incoming_messages = incoming_messages or []
         self.outgoing_messages = []
+        self.uploaded_files = []
         self.name_lookup = name_lookup or {}
 
     def read_next_messages_for_channel(self, channel_id):
@@ -25,3 +26,6 @@ class MockSlack:
     def send(self, recipient, message, attachments):
         msg = {"recipient": recipient, "message": message}
         self.outgoing_messages.append(msg)
+
+    def upload_file(self, channel, filename, file_handle):
+        self.uploaded_files.append(filename)

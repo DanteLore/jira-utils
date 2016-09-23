@@ -1,4 +1,6 @@
+import matplotlib
 import numpy as np
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 
@@ -7,7 +9,8 @@ class BarChart:
     ctm_light_blue = "#86A6DE"
     ctm_green = "#3DB633"
 
-    def __init__(self, x_data, y_data):
+    def __init__(self, x_data, y_data, title=None):
+        self.title = title
         self.x_data = x_data
         self.y_data = y_data
 
@@ -26,10 +29,14 @@ class BarChart:
 
         ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('left')
+        plt.yticks(np.arange(min(self.y_data), max(self.y_data)+1, 1.0))
 
         self.set_background_color(ax, "white")
         self.set_foreground_color(ax, self.ctm_dark_blue)
         fig.patch.set_facecolor("white")
+
+        if self.title:
+            plt.title(self.title)
 
         # fig.autofmt_xdate()
         fig.set_tight_layout(True)

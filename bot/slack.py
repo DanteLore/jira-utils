@@ -75,3 +75,6 @@ class Slack:
             icon_emoji=':office:',
             attachments=attachments or []
         )
+
+    def upload_file(self, channel, filename, file_handle):
+        self.slack.api_call('files.upload', channels=channel, filename=filename, file=file_handle, username='@jirabot')

@@ -4,7 +4,6 @@ import unittest
 import unicodedata
 from fuzzywuzzy import process
 from slackclient import SlackClient
-from slacker import Slacker
 
 BOT_NAME = 'jirabot'
 
@@ -15,7 +14,7 @@ BOT_NAME = 'jirabot'
 
 class SlackTests(unittest.TestCase):
     def setUp(self):
-        self.slack = SlackClient('??')
+        self.slack = SlackClient('???')
 
     def test_connect(self):
         api_call = self.slack.api_call("users.list")
@@ -78,6 +77,11 @@ class SlackTests(unittest.TestCase):
                 }
             ]
         )
+
+    def test_uploading_a_file(self):
+        file = open('/tmp/chart1.png', 'rb')
+        response = self.slack.api_call('files.upload', channels="G20QELUUV", filename='chart1.png', file=file, username='@jirabot')
+        print response
 
     def test_name_matching(self):
         users = self.slack.api_call("users.list")

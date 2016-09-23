@@ -28,13 +28,18 @@ class Channel:
             self.slack.send(self.channel, message, attachments)
 
     def get_messages(self):
-        my_id = self.bot_id.lower()
+        my_id = self.bot_id
         messages = self.slack.read_next_messages_for_channel(self.channel_id)
         messages = filter(lambda m: "text" in m, messages)
         for message in messages:
             text = message["text"].lower()
             user = message.get("user") or ""
-            self.logger.debug(u"Processing message: {0}".format(text))
-            if my_id in text:
+            self.logger.debug(u"Processing message: {0} '{1}'".format(user, text))
+            if my_id.lower() in text and user != my_id:
                 self.logger.debug("I was mentioned")
                 yield text, user
+
+    def upload_file(self, filename):
+        with open(filename, 'rb') as f:
+            self.logger.info("Uploading file from '{0}' to channel {1}".format(filename, self.channel))
+            self.slack.upload_file(self.channel_id, filename, f)

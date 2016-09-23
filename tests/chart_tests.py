@@ -1,15 +1,11 @@
 import unittest
-import webbrowser
 
-from charts.bar_chart import BarChart
+from charts.jira_charts import JiraCharts
+from jira_utils.jira_utils import Jira
 
 
 class ChartTests(unittest.TestCase):
     def test_bar_chart(self):
-        x_data = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-        y_data = [3, 2, 1, 2, 3]
+        jira = Jira("https://poo.atlassian.net").with_project("BIB").with_label("BRO")
 
-        chart = BarChart(x_data, y_data)
-        chart.save_to_file("/tmp/chart1.png")
-
-        webbrowser.open("file:///tmp/chart1.png")
+        JiraCharts(jira).stories_closed_per_day()

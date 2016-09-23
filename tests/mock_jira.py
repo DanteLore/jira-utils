@@ -68,6 +68,9 @@ class MockJira:
         new_issues = filter(lambda i: i.fields.created is not None and dateutil.parser.parse(i.fields.created) <= threshold, self.issues)
         return MockJira(issue_objects=new_issues).status_is("In Progress")
 
+    def resolved_n_days_ago(self, n):
+        return MockJira(issue_objects=[])
+
     def status_is_not(self, statuses):
         lower_statuses = map(lambda s: s.lower(), statuses)
         new_issues = filter(lambda i: i.fields.status.lower() not in lower_statuses, self.issues)

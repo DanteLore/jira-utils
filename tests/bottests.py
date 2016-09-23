@@ -254,3 +254,12 @@ class JiraBotTests(unittest.TestCase):
         self.assertEqual("#channel_name", slack.outgoing_messages[0]["recipient"])
         self.assertEqual(':warning: XXX-1 is assigned to <@BLOGGSID> but still in the Backlog state',
                          slack.outgoing_messages[0]["message"])
+
+    def test_request_to_show_stories_closed_per_day_chart(self):
+        jira = MockJira(issues=[])
+        slack = MockSlack()
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_4", 3, logger=self.logger)
+        slack.add_incoming({u'text': u'<@BOTID> chart stories closed'})
+        bot.process_messages()
+        self.assertEqual(1, len(slack.uploaded_files))
+        self.assertEqual(0, len(slack.outgoing_messages))
