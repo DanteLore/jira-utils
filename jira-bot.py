@@ -1,5 +1,6 @@
 import argparse
 import logging
+import logging.handlers
 from time import sleep
 
 from bot.jirabot import JiraBot
@@ -21,8 +22,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logger = logging.getLogger("JiraBot")
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+    file_handler = logging.handlers.RotatingFileHandler("/var/log/jirabot/jirabot.log", maxBytes=1024 * 1024 * 10,
+                                                        backupCount=10)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
     stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    stream_handler.setFormatter(formatter)
     logger.setLevel(args.log_level)
     logger.addHandler(stream_handler)
 
