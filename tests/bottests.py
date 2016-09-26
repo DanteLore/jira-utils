@@ -256,10 +256,19 @@ class JiraBotTests(unittest.TestCase):
                          slack.outgoing_messages[0]["message"])
 
     def test_request_to_show_stories_closed_per_day_chart(self):
-        jira = MockJira(issues=[])
+        jira = MockJira().with_n_fake_issues(50)
         slack = MockSlack()
         bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_4", 3, logger=self.logger)
         slack.add_incoming({u'text': u'<@BOTID> chart stories closed'})
+        bot.process_messages()
+        self.assertEqual(1, len(slack.uploaded_files))
+        self.assertEqual(0, len(slack.outgoing_messages))
+
+    def test_request_to_show_stories_closed_per_week_chart(self):
+        jira = MockJira().with_n_fake_issues(50)
+        slack = MockSlack()
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_4", 3, logger=self.logger)
+        slack.add_incoming({u'text': u'<@BOTID> chart stories closed by week'})
         bot.process_messages()
         self.assertEqual(1, len(slack.uploaded_files))
         self.assertEqual(0, len(slack.outgoing_messages))

@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta
 import dateutil.parser
 import pytz
@@ -37,6 +38,10 @@ class MockJira:
                 issue = MockIssue(row)
                 self.issues.append(issue)
 
+    def with_n_fake_issues(self, n):
+        new_issues = [{"id": "XXX-{0}".format(i), "summary": "x", "assignee": "x", "status": "Backlog"} for i in range(n)]
+        return MockJira(issues=new_issues)
+
     def with_id(self, id):
         new_issues = filter(lambda i: i.fields.id == id, self.issues)
         return MockJira(issue_objects=new_issues)
@@ -69,7 +74,12 @@ class MockJira:
         return MockJira(issue_objects=new_issues).status_is("In Progress")
 
     def resolved_n_days_ago(self, n):
-        return MockJira(issue_objects=[])
+        x = random.randint(0, len(self.issues))
+        return MockJira(issue_objects=self.issues[x:])
+
+    def resolved_n_weeks_ago(self, n):
+        x = random.randint(0, len(self.issues))
+        return MockJira(issue_objects=self.issues[x:])
 
     def status_is_not(self, statuses):
         lower_statuses = map(lambda s: s.lower(), statuses)

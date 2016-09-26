@@ -57,8 +57,12 @@ class JiraBot:
         if "chart" in text or "graph" in text:
             if "stories closed" in text or "cards closed" in text or "issues closed" in text \
                     or "stories done" in text or "cards done" in text or "issues done" in text:
-                self.logger.debug("Received command to chart stories closed")
-                files.append(self.charts.stories_closed_per_day())
+                if "week" in text:
+                    self.logger.debug("Received command to chart stories closed by week")
+                    files.append(self.charts.stories_closed_per_day())
+                else:
+                    self.logger.debug("Received command to chart stories closed by day")
+                    files.append(self.charts.stories_closed_per_week())
             self.logger.debug("Finished processing chart command")
 
         if len(messages) == 0 and len(files) == 0:
