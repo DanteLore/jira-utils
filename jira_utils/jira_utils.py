@@ -71,10 +71,20 @@ class Jira:
             }
             self.jira = JIRA(options)
         self.logger.debug("Executing JQL query: '{0}'".format(self.jql))
-        return self.jira.search_issues(self.jql, maxResults=100)
+        results = self.jira.search_issues(self.jql, maxResults=1000)
+        self.logger.debug("Fetched {0} results".format(len(results)))
+        return results
 
     def resolved_n_days_ago(self, day):
         fragment = "resolutionDate >= startOfDay(-{0}d) and resolutionDate < endOfDay(-{0}d)".format(day)
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
+    def created_n_days_ago(self, day):
+        fragment = "created >= startOfDay(-{0}d) and created < endOfDay(-{0}d)".format(day)
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
+    def open_issues_n_days_ago(self, day):
+        fragment = '(status was not in ("Done", "Closed") before endOfDay(-{0}d))'.format(day)
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
     def resolved_n_weeks_ago(self, week):

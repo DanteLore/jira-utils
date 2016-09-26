@@ -77,6 +77,14 @@ class MockJira:
         x = random.randint(0, len(self.issues))
         return MockJira(issue_objects=self.issues[x:])
 
+    def created_n_days_ago(self, n):
+        x = random.randint(0, len(self.issues))
+        return MockJira(issue_objects=self.issues[x:])
+
+    def open_issues_n_days_ago(self, n):
+        x = random.randint(0, len(self.issues))
+        return MockJira(issue_objects=self.issues[x:])
+
     def resolved_n_weeks_ago(self, n):
         x = random.randint(0, len(self.issues))
         return MockJira(issue_objects=self.issues[x:])

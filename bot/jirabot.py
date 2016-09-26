@@ -59,10 +59,10 @@ class JiraBot:
                     or "stories done" in text or "cards done" in text or "issues done" in text:
                 if "week" in text:
                     self.logger.debug("Received command to chart stories closed by week")
-                    files.append(self.charts.stories_closed_per_day())
+                    files.append(self.charts.stories_closed_per_week())
                 else:
                     self.logger.debug("Received command to chart stories closed by day")
-                    files.append(self.charts.stories_closed_per_week())
+                    files.append(self.charts.stories_closed_per_day())
             self.logger.debug("Finished processing chart command")
 
         if len(messages) == 0 and len(files) == 0:
