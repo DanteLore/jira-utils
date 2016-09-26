@@ -29,7 +29,7 @@ class JiraCharts:
     def stories_closed_per_day(self, report_range=7, title="Stories Closed by Day", force=False):
         filename = self.get_temp_filename("{0} {1}".format(title, report_range))
 
-        if not os.path.exists(filename) or not force:
+        if not os.path.exists(filename) or force:
             today = datetime.today()
             offsets = [x for x in range(report_range, -1, -1) if (today - timedelta(days=x)).weekday() not in [5, 6]]
             days = [(today - timedelta(days=x)).strftime('%A') for x in offsets]
@@ -43,7 +43,7 @@ class JiraCharts:
     def stories_closed_per_week(self, report_range=6, title="Stories Closed by Week", force=False):
         filename = self.get_temp_filename("{0} {1}".format(title, report_range))
 
-        if not os.path.exists(filename) or not force:
+        if not os.path.exists(filename) or force:
             today = datetime.today()
             offsets = [x for x in range(report_range, -1, -1)]
             dates = [(today - timedelta(days=x*7)).strftime('%d/%m') for x in offsets]
@@ -57,7 +57,7 @@ class JiraCharts:
     def progress_by_day(self, report_range=31, title="Stories Closed vs Stories Added by Day", force=False):
         filename = self.get_temp_filename("{0} {1}".format(title, report_range))
 
-        if not os.path.exists(filename) or not force:
+        if not os.path.exists(filename) or force:
             today = datetime.today()
             offsets = [x for x in range(report_range, -1, -1) if (today - timedelta(days=x)).weekday() not in [5, 6]]
             days = [(today - timedelta(days=x)).strftime('%d/%m') for x in offsets]
