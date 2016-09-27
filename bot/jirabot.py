@@ -16,8 +16,10 @@ class JiraBot:
             self.logger.setLevel("DEBUG")
             self.logger.addHandler(logging.StreamHandler())
 
-        jira = jira.with_project(project).with_label(label)
-        self.warning_detector = JiraWarningDetector(jira, slack, project, label, self.logger, wip_limit, wip_time_limit)
+        jira = jira.with_project(project)
+        if label:
+            jira = jira.with_label(label)
+        self.warning_detector = JiraWarningDetector(jira, slack, self.logger, wip_limit, wip_time_limit)
         self.jira_executor = JiraQueryExecutor(jira)
         self.charts = JiraCharts(jira, self.logger)
         self.channel = Channel(slack, channel, MessageToJiraAttachmentConverter(jira), self.logger)

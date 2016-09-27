@@ -2,11 +2,9 @@ from itertools import groupby
 
 
 class JiraWarningDetector:
-    def __init__(self, jira, slack, project, label, logger, wip_limit=5, wip_time_limit=7):
+    def __init__(self, jira, slack, logger, wip_limit=5, wip_time_limit=7):
         self.wip_limit = wip_limit
         self.wip_time_limit = wip_time_limit
-        self.label = label
-        self.project = project
         self.jira = jira
         self.slack = slack
         self.logger = logger

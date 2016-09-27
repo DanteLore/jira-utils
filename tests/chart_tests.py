@@ -19,7 +19,7 @@ class ChartTests(unittest.TestCase):
         stream_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
         logger.setLevel("DEBUG")
         logger.addHandler(stream_handler)
-        self.jira = Jira("https://comparethemarket.atlassian.net", logger=logger).with_project("BIB").with_label("BRO")
+        self.jira = Jira("https://comparethemarket.atlassian.net", logger=logger).with_project("BIB")#.with_label("BRO")
         #self.jira = MockJira().with_n_fake_issues(50)
 
     def test_stories_closed_by_day(self):
@@ -31,5 +31,5 @@ class ChartTests(unittest.TestCase):
         webbrowser.open("file://" + filename)
 
     def test_up_down_chat(self):
-        filename = JiraCharts(self.jira).progress_by_day(force=True)
+        filename = JiraCharts(self.jira).progress_by_day(31, force=True)
         webbrowser.open("file://" + filename)

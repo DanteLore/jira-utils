@@ -11,7 +11,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Jira Bot')
     parser.add_argument('--jira', help='Jira Server', required=True)
     parser.add_argument('--project', help='Jira Project ID', required=True)
-    parser.add_argument('--label', help='Jira Label', required=True)
+    parser.add_argument('--label', help='Jira Label', default=None)
     parser.add_argument('--wip-limit', help='How many In Progress issues is too many?', default="3")
     parser.add_argument('--slack-key', help='The key for slack', required=True)
     parser.add_argument('--channel', help='The channel on which to complain about stuff', required=True)
