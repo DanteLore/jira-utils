@@ -55,6 +55,9 @@ class JiraBot:
             self.logger.debug("Finished processing status command")
 
         if "chart" in text or "graph" in text:
+            if "progress" in text:
+                self.logger.debug("Received command to show a progress chart")
+                files.append(self.charts.progress_by_day())
             if "stories closed" in text or "cards closed" in text or "issues closed" in text \
                     or "stories done" in text or "cards done" in text or "issues done" in text:
                 if "week" in text:

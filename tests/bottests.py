@@ -272,3 +272,12 @@ class JiraBotTests(unittest.TestCase):
         bot.process_messages()
         self.assertEqual(1, len(slack.uploaded_files))
         self.assertEqual(0, len(slack.outgoing_messages))
+
+    def test_request_to_show_progress_chart(self):
+        jira = MockJira().with_n_fake_issues(50)
+        slack = MockSlack()
+        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_4", 3, logger=self.logger)
+        slack.add_incoming({u'text': u'<@BOTID> show chart progress'})
+        bot.process_messages()
+        self.assertEqual(1, len(slack.uploaded_files))
+        self.assertEqual(0, len(slack.outgoing_messages))
