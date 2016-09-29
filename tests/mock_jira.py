@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import dateutil.parser
 import pytz
 
+
 class MockIssue:
     class _MockIssueFields:
         def __init__(self, fields):
@@ -51,6 +52,9 @@ class MockJira:
         return MockJira(issue_objects=new_issues)
 
     def with_project(self, _):
+        return self
+
+    def with_fix_version(self, _):
         return self
 
     def with_label(self, _):

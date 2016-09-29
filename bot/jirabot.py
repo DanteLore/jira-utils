@@ -8,7 +8,7 @@ from charts.jira_charts import JiraCharts
 
 
 class JiraBot:
-    def __init__(self, jira, slack, project, label, channel, wip_limit=5, wip_time_limit=7, logger=None):
+    def __init__(self, jira, slack, project, label, fix_version, channel, wip_limit=5, wip_time_limit=7, logger=None):
         if logger:
             self.logger = logger
         else:
@@ -19,6 +19,9 @@ class JiraBot:
         jira = jira.with_project(project)
         if label:
             jira = jira.with_label(label)
+        if fix_version:
+            jira = jira.with_fix_version(fix_version)
+
         self.warning_detector = JiraWarningDetector(jira, slack, self.logger, wip_limit, wip_time_limit)
         self.jira_executor = JiraQueryExecutor(jira)
         self.charts = JiraCharts(jira, self.logger)
@@ -90,6 +93,7 @@ class JiraBot:
                     ":one: 'show warnings', 'show to do', 'show in progress' or 'show backlog'\n" +
                     ":two: 'status summary'\n" +
                     ":three: 'chart stories closed'\n" +
+                    ":four: 'chart progress'\n" +
                     "and always remember to mention me by name!"
         }
 

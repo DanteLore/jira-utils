@@ -36,6 +36,10 @@ class Jira:
         fragment = 'project = "{0}"'.format(project)
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
+    def with_fix_version(self, fix_version):
+        fragment = 'fixVersion = "{0}"'.format(fix_version)
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
     def with_label(self, label):
         fragment = 'labels in ("{0}")'.format(label)
         return Jira(self.server, self.join(fragment), logger=self.logger)
