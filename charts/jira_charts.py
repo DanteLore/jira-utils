@@ -20,7 +20,7 @@ class JiraCharts:
             self.logger.addHandler(logging.StreamHandler())
 
     def get_temp_filename(self, title = "chart"):
-        path = datetime.now().strftime("/tmp/jira-charts/%Y/%m/%d")
+        path = datetime.now().strftime("/tmp/jira-charts/{0}/%Y/%m/%d/%h").format(os.getpid())
         mkpath(path)
         title = re.sub("[^a-zA-Z0-9]", "_", title)
         filename = "{0}/{1}.png".format(path, title)
