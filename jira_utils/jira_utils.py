@@ -76,8 +76,12 @@ class Jira:
                 'server': self.server
             }
             self.jira = JIRA(options)
+        if fields:
+            fields_to_use = fields
+        else:
+            fields_to_use = self.fields
         self.logger.debug("Executing JQL query: '{0}'".format(self.jql))
-        results = self.jira.search_issues(self.jql, fields=fields or self.fields, maxResults=1000)
+        results = self.jira.search_issues(self.jql, fields=fields_to_use, maxResults=1000)
         self.logger.debug("Fetched {0} results".format(len(results)))
         return results
 
