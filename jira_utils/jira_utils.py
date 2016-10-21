@@ -10,6 +10,8 @@ class Jira:
         self.jql = jql
         self.jira = None
 
+        self.fields = ["id","summary","assignee","status","project","created","updated"]
+
         if logger:
             self.logger = logger
         else:
@@ -75,7 +77,7 @@ class Jira:
             }
             self.jira = JIRA(options)
         self.logger.debug("Executing JQL query: '{0}'".format(self.jql))
-        results = self.jira.search_issues(self.jql, maxResults=1000)
+        results = self.jira.search_issues(self.jql, fields=self.fields, maxResults=1000)
         self.logger.debug("Fetched {0} results".format(len(results)))
         return results
 
