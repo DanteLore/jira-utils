@@ -68,16 +68,16 @@ class Jira:
         return Jira(self.server, self.jql + ' order by {0}'.format(field), logger=self.logger)
 
     def count_issues(self):
-        return len(self.get_issues())
+        return len(self.get_issues(["id"]))
 
-    def get_issues(self):
+    def get_issues(self, fields=None):
         if self.jira is None:
             options = {
                 'server': self.server
             }
             self.jira = JIRA(options)
         self.logger.debug("Executing JQL query: '{0}'".format(self.jql))
-        results = self.jira.search_issues(self.jql, fields=self.fields, maxResults=1000)
+        results = self.jira.search_issues(self.jql, fields=fields or self.fields, maxResults=1000)
         self.logger.debug("Fetched {0} results".format(len(results)))
         return results
 
