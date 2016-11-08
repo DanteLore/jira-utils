@@ -13,7 +13,8 @@ class JiraWarningDetector:
         warnings = list(self.assigned_but_not_in_progress())
         warnings += list(self.too_many_in_progress())
         warnings += list(self.in_progress_but_not_assigned())
-        warnings += list(self.in_progress_for_too_long())
+        # Disabled to calm people down
+        # warnings += list(self.in_progress_for_too_long())
         return warnings
 
     def too_many_in_progress(self):
