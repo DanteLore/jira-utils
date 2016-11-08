@@ -76,7 +76,7 @@ class RandomQuote:
         elif len(b) > 0 and not (b.strip().endswith('.') or b.strip().endswith('?')):
             m = m[0].lower() + m[1:]
 
-        if random.randint(50) == 0:
+        if random.randint(0, 50) == 0:
             return ["{0}{1}{2}".format(b, m, e)]
         else:
             return []
