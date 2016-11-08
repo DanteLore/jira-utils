@@ -3,6 +3,7 @@ import logging
 from bot.channel import Channel
 from bot.jira_query_executor import JiraQueryExecutor
 from bot.message_to_jira_attachment_converter import MessageToJiraAttachmentConverter
+from bot.random_quote import RandomQuote
 from bot.warning_detector import JiraWarningDetector
 from charts.jira_charts import JiraCharts
 
@@ -26,6 +27,7 @@ class JiraBot:
         self.jira_executor = JiraQueryExecutor(jira)
         self.charts = JiraCharts(jira, self.logger)
         self.channel = Channel(slack, channel, MessageToJiraAttachmentConverter(jira), self.logger)
+        self.random_quote = RandomQuote()
 
     def process_messages(self):
         for text, user in self.channel.get_messages():
@@ -100,6 +102,9 @@ class JiraBot:
     def send_periodic_update(self):
         messages = self.get_warnings()
         messages += self.jira_executor.get_new_issues_on_backlog()
+
+        messages += self.random_quote.get_quote()
+
         for message in messages:
             self.channel.send(message, force=False)
 

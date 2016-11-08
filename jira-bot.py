@@ -59,9 +59,6 @@ if __name__ == "__main__":
             logger.exception(e)
             logger.error(e.message)
 
-            # Recreate the slack client here - might help with transient disconnection/timeout. Maybe.
-            slack = Slack(args.slack_key, logger=logger)
-
             slack.send("dan_taylor", "I crashed!!")
             slack.send("dan_taylor", e.message)
         if not args.forever:
