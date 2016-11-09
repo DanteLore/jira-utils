@@ -9,7 +9,8 @@ from charts.jira_charts import JiraCharts
 
 
 class JiraBot:
-    def __init__(self, jira, slack, project, label, fix_version, channel, wip_limit=5, wip_time_limit=7, logger=None):
+    def __init__(self, jira, slack, project, label, fix_version, channel, wip_limit=5, wip_time_limit=7, logger=None,
+                 supress_quotes=False):
         if logger:
             self.logger = logger
         else:
@@ -27,7 +28,11 @@ class JiraBot:
         self.jira_executor = JiraQueryExecutor(jira)
         self.charts = JiraCharts(jira, self.logger)
         self.channel = Channel(slack, channel, MessageToJiraAttachmentConverter(jira), self.logger)
-        self.random_quote = RandomQuote()
+
+        if not supress_quotes:
+            self.random_quote = RandomQuote()
+        else:
+            self.random_quote = None
 
     def process_messages(self):
         for text, user in self.channel.get_messages():
@@ -103,7 +108,8 @@ class JiraBot:
         messages = self.get_warnings()
         messages += self.jira_executor.get_new_issues_on_backlog()
 
-        messages += self.random_quote.get_quote()
+        if self.random_quote:
+            messages += self.random_quote.get_quote()
 
         for message in messages:
             self.channel.send(message, force=False)
