@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 
 
 class RandomQuote:
@@ -66,6 +67,9 @@ class RandomQuote:
         ". Search your soul - is that truly the way we've been working?"
     ]
 
+    def should_quote(self):
+        return 8 < datetime.now().hour < 19 and datetime.now().weekday() < 5 and random.randint(0, 50) == 0
+
     def get_quote(self):
         b = random.choice(self.beginnings)
         m = random.choice(self.middles)
@@ -76,7 +80,7 @@ class RandomQuote:
         elif len(b) > 0 and not (b.strip().endswith('.') or b.strip().endswith('?')):
             m = m[0].lower() + m[1:]
 
-        if random.randint(0, 50) == 0:
+        if self.should_quote():
             return ["{0}{1}{2}".format(b, m, e)]
         else:
             return []
