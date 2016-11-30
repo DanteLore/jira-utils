@@ -31,5 +31,5 @@ class ChartTests(unittest.TestCase):
         webbrowser.open("file://" + filename)
 
     def test_up_down_chat(self):
-        filename = JiraCharts(self.jira).progress_by_day(31, force=True)
+        filename = JiraCharts(self.jira).progress_by_day(10, force=True)
         webbrowser.open("file://" + filename)

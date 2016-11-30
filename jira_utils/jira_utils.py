@@ -94,7 +94,7 @@ class Jira:
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
     def open_issues_n_days_ago(self, day):
-        fragment = '(status was not in ("Done", "Closed") before endOfDay(-{0}d))'.format(day)
+        fragment = '(status was not in ("Done", "Closed") before endOfDay(-{0}d)) and created < endOfDay(-{0}d)'.format(day)
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
     def resolved_n_weeks_ago(self, week):
