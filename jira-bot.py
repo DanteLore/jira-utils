@@ -2,6 +2,7 @@ import argparse
 import logging
 import logging.handlers
 from time import sleep
+from datetime import datetime
 
 from bot.jirabot import JiraBot
 from bot.slack import Slack
@@ -13,6 +14,8 @@ if __name__ == "__main__":
     parser.add_argument('--project', help='Jira Project ID', required=True)
     parser.add_argument('--label', help='Jira Label', default=None)
     parser.add_argument('--freq', help='Polling frequency in minutes (default 30)', default=30)
+    parser.add_argument('--wake-hour', help='Hour of day to wake up (default 6)', default=6)
+    parser.add_argument('--sleep-hour', help='Hour of day to sleep (default 19)', default=19)
     parser.add_argument('--fix-version', help='Jira Fix Version', default=None)
     parser.add_argument('--wip-limit', help='How many In Progress issues is too many?', default="3")
     parser.add_argument('--slack-key', help='The key for slack', required=True)
@@ -52,7 +55,8 @@ if __name__ == "__main__":
     while True:
         try:
             bot.process_messages()
-            if count > (args.freq * 60 * 10):
+            hour = datetime.now().hour
+            if count > (args.freq * 60 * 10) and args.wake_hour <= hour < args.sleep_hour:
                 count = 0
                 bot.send_periodic_update()
             count += 1
