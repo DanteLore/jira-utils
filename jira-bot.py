@@ -51,16 +51,13 @@ if __name__ == "__main__":
     while True:
         try:
             bot.process_messages()
-            if count > 3000:
+            if count > 18000:
                 count = 0
                 bot.send_periodic_update()
             count += 1
         except Exception as e:
             logger.exception(e)
             logger.error(e.message)
-
-            slack.send("dan_taylor", "I crashed!!")
-            slack.send("dan_taylor", e.message)
         if not args.forever:
             break
         sleep(0.1)
