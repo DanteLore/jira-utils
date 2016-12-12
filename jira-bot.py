@@ -12,6 +12,7 @@ if __name__ == "__main__":
     parser.add_argument('--jira', help='Jira Server', required=True)
     parser.add_argument('--project', help='Jira Project ID', required=True)
     parser.add_argument('--label', help='Jira Label', default=None)
+    parser.add_argument('--freq', help='Polling frequency in minutes (default 30)', default=30)
     parser.add_argument('--fix-version', help='Jira Fix Version', default=None)
     parser.add_argument('--wip-limit', help='How many In Progress issues is too many?', default="3")
     parser.add_argument('--slack-key', help='The key for slack', required=True)
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     while True:
         try:
             bot.process_messages()
-            if count > 18000:
+            if count > (args.freq * 60 * 10):
                 count = 0
                 bot.send_periodic_update()
             count += 1
