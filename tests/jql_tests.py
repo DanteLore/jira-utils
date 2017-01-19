@@ -64,6 +64,14 @@ class JiraJqlGenerationTests(unittest.TestCase):
         jira = Jira("").resolved_n_days_ago(2)
         self.assertEqual('resolutionDate >= startOfDay(-2d) and resolutionDate < endOfDay(-2d)', jira.jql)
 
+    def resolved_this_week(self):
+        jira = Jira("").resolved_this_week()
+        self.assertEqual('resolutionDate >= startOfWeek()', jira.jql)
+
+    def resolved_last_week(self):
+        jira = Jira("").resolved_last_week()
+        self.assertEqual('resolutionDate >= startOfWeek(-1w) and resolutionDate < endOfWeek(-1w)', jira.jql)
+
     def in_progress_for_7_days(self):
         jira = Jira("").in_progress_for_n_days(7)
         self.assertEqual('status changed to "In Progress" before -7d', jira.jql)

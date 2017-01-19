@@ -77,21 +77,23 @@ class MockJira:
         new_issues = filter(lambda i: i.fields.created is not None and dateutil.parser.parse(i.fields.created) <= threshold, self.issues)
         return MockJira(issue_objects=new_issues).status_is("In Progress")
 
-    def resolved_n_days_ago(self, n):
+    def resolved_n_days_ago(self, _):
         x = random.randint(0, len(self.issues))
         return MockJira(issue_objects=self.issues[x:])
 
-    def created_n_days_ago(self, n):
+    def created_n_days_ago(self, _):
         x = random.randint(0, len(self.issues))
         return MockJira(issue_objects=self.issues[x:])
 
-    def open_issues_n_days_ago(self, n):
+    def open_issues_n_days_ago(self, _):
         x = random.randint(0, len(self.issues))
         return MockJira(issue_objects=self.issues[x:])
 
-    def resolved_n_weeks_ago(self, n):
-        x = random.randint(0, len(self.issues))
-        return MockJira(issue_objects=self.issues[x:])
+    def resolved_this_week(self):
+        return MockJira(issue_objects=self.issues)
+
+    def resolved_last_week(self):
+        return MockJira(issue_objects=self.issues)
 
     def status_is_not(self, statuses):
         lower_statuses = map(lambda s: s.lower(), statuses)

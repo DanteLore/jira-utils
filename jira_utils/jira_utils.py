@@ -97,8 +97,12 @@ class Jira:
         fragment = '(status was not in ("Done", "Closed") before endOfDay(-{0}d)) and created < endOfDay(-{0}d)'.format(day)
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
-    def resolved_n_weeks_ago(self, week):
-        fragment = "resolutionDate >= startOfWeek(-{0}w) and resolutionDate < endOfWeek(-{0}w)".format(week)
+    def resolved_this_week(self):
+        fragment = "resolutionDate >= startOfWeek()"
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
+    def resolved_last_week(self):
+        fragment = "resolutionDate >= startOfWeek(-1w) and resolutionDate < endOfWeek(-1w)"
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
     def in_progress_for_n_days(self, days):

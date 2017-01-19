@@ -264,20 +264,42 @@ class JiraBotTests(unittest.TestCase):
         self.assertEqual(1, len(slack.uploaded_files))
         self.assertEqual(0, len(slack.outgoing_messages))
 
-    def test_request_to_show_stories_closed_per_week_chart(self):
-        jira = MockJira().with_n_fake_issues(50)
-        slack = MockSlack()
-        bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_4", 3, logger=self.logger, supress_quotes=True)
-        slack.add_incoming({u'text': u'<@BOTID> chart stories closed by week'})
-        bot.process_messages()
-        self.assertEqual(1, len(slack.uploaded_files))
-        self.assertEqual(0, len(slack.outgoing_messages))
-
     def test_request_to_show_progress_chart(self):
         jira = MockJira().with_n_fake_issues(50)
         slack = MockSlack()
         bot = JiraBot(jira, slack, "XXX", "LABEL", "#channel_4", 3, logger=self.logger, supress_quotes=True)
-        slack.add_incoming({u'text': u'<@BOTID> show chart progress'})
+        slack.add_incoming({u'text': u'<@BOTID> chart progress'})
         bot.process_messages()
         self.assertEqual(1, len(slack.uploaded_files))
         self.assertEqual(0, len(slack.outgoing_messages))
+
+    def get_completed_issue_set(self):
+        return [
+            {"id": "XXX-1", "summary": "My first Jira", "assignee": "Tooth Fairy", "status": "Done"},
+            {"id": "XXX-2", "summary": "My second Jira", "assignee": "Tooth Fairy", "status": "Done"},
+            {"id": "XXX-3", "summary": "My third Jira", "assignee": "Tooth Fairy", "status": "Done"},
+            {"id": "XXX-4", "summary": "My fourth Jira", "assignee": "Bogey Man", "status": "Done"},
+            {"id": "XXX-5", "summary": "My fifth Jira", "assignee": "Bogey Man", "status": "Done"},
+            {"id": "XXX-6", "summary": "My sixth Jira", "assignee": "Santa", "status": "Done"},
+            {"id": "XXX-7", "summary": "My seventh Jira", "assignee": "Santa", "status": "Done"}
+        ]
+
+    def get_name_lookup_for_leader_board(self):
+        return {
+            "Tooth Fairy": "TOOTHID",
+            "Bogey Man": "BOGEYID",
+            "Santa": "SANTAID"
+        }
+
+    def test_leader_board(self):
+        jira = MockJira(issues=self.get_completed_issue_set())
+        slack = MockSlack(name_lookup=self.get_name_lookup_for_leader_board())
+        bot = JiraBot(jira, slack, "XXX", "LABEL", None, "#channel_name", 3, logger=self.logger, supress_quotes=True)
+        slack.add_incoming({u'text': u'<@BOTID> leader board'})
+        bot.process_messages()
+        self.assertEqual(len(slack.outgoing_messages), 1)
+        self.assertEqual("#channel_name", slack.outgoing_messages[0]["recipient"])
+        message = slack.outgoing_messages[0]["message"]
+        self.assertIn("<@TOOTHID>", message)
+        self.assertIn("<@BOGEYID>", message)
+        self.assertIn("<@SANTAID>", message)

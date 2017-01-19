@@ -2,6 +2,7 @@ import logging
 
 from bot.channel import Channel
 from bot.jira_query_executor import JiraQueryExecutor
+from bot.leader_board import LeaderBoard
 from bot.message_to_jira_attachment_converter import MessageToJiraAttachmentConverter
 from bot.random_quote import RandomQuote
 from bot.warning_detector import JiraWarningDetector
@@ -26,6 +27,7 @@ class JiraBot:
 
         self.warning_detector = JiraWarningDetector(jira, slack, self.logger, wip_limit, wip_time_limit)
         self.jira_executor = JiraQueryExecutor(jira)
+        self.leader_board = LeaderBoard(jira, slack)
         self.charts = JiraCharts(jira, self.logger)
         self.channel = Channel(slack, channel, MessageToJiraAttachmentConverter(jira), self.logger)
 
@@ -66,18 +68,23 @@ class JiraBot:
                 messages.append(self.jira_executor.get_status_summary())
             self.logger.debug("Finished processing status command")
 
+        if "leader board" or "leaderboard" in text:
+            if "last week" in text:
+                self.logger.debug("Received command to show leader board for LAST week")
+                messages.append(self.leader_board.last_week())
+            else:
+                self.logger.debug("Received command to show leader board for THIS week")
+                messages.append(self.leader_board.this_week())
+            self.logger.debug("Finished processing leader board command")
+
         if "chart" in text or "graph" in text:
             if "progress" in text:
                 self.logger.debug("Received command to show a progress chart")
                 files.append(self.charts.progress_by_day())
             if "stories closed" in text or "cards closed" in text or "issues closed" in text \
                     or "stories done" in text or "cards done" in text or "issues done" in text:
-                if "week" in text:
-                    self.logger.debug("Received command to chart stories closed by week")
-                    files.append(self.charts.stories_closed_per_week())
-                else:
-                    self.logger.debug("Received command to chart stories closed by day")
-                    files.append(self.charts.stories_closed_per_day())
+                self.logger.debug("Received command to chart stories closed by day")
+                files.append(self.charts.stories_closed_per_day())
             self.logger.debug("Finished processing chart command")
 
         if len(messages) == 0 and len(files) == 0:
@@ -101,6 +108,7 @@ class JiraBot:
                     ":two: 'status summary'\n" +
                     ":three: 'chart stories closed'\n" +
                     ":four: 'chart progress'\n" +
+                    ":five: 'leader board'\n" +
                     "and always remember to mention me by name!"
         }
 
