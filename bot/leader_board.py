@@ -27,7 +27,13 @@ class LeaderBoard:
         return user
 
     def group_issues(self, issues):
-        for (name, cards) in groupby(issues, lambda card: card.fields.assignee):
+        def get_key(card):
+            return str(card.fields.assignee)
+
+        # You must SORT before you GROUP. Which is :poo:
+        issues = sorted(list(issues), key=get_key)
+
+        for name, cards in groupby(issues, key=get_key):
             yield (name, len(list(cards)))
 
     def format_table(self, title, issues):

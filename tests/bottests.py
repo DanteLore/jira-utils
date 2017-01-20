@@ -277,8 +277,8 @@ class JiraBotTests(unittest.TestCase):
         return [
             {"id": "XXX-1", "summary": "My first Jira", "assignee": "Santa", "status": "Done"},
             {"id": "XXX-2", "summary": "My second Jira", "assignee": "Tooth Fairy", "status": "Done"},
-            {"id": "XXX-3", "summary": "My third Jira", "assignee": "Tooth Fairy", "status": "Done"},
-            {"id": "XXX-4", "summary": "My fourth Jira", "assignee": "Bogey Man", "status": "Done"},
+            {"id": "XXX-3", "summary": "My third Jira", "assignee": "Bogey Man", "status": "Done"},
+            {"id": "XXX-4", "summary": "My fourth Jira", "assignee": "Tooth Fairy", "status": "Done"},
             {"id": "XXX-5", "summary": "My fifth Jira", "assignee": "Bogey Man", "status": "Done"},
             {"id": "XXX-6", "summary": "My sixth Jira", "assignee": "Santa", "status": "Done"},
             {"id": "XXX-7", "summary": "My seventh Jira", "assignee": "Tooth Fairy", "status": "Done"}
