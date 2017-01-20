@@ -1,6 +1,3 @@
-import logging
-
-
 class MockSlack:
     def __init__(self, incoming_messages=None, name_lookup=None):
         self.incoming_messages = incoming_messages or []
