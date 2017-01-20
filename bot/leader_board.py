@@ -28,12 +28,17 @@ class LeaderBoard:
 
     def group_issues(self, issues):
         for (name, cards) in groupby(issues, lambda card: card.fields.assignee):
-            yield name, len(list(cards))
+            yield (name, len(list(cards)))
 
-    def format_table(self, issues):
-        lines = []
+    def format_table(self, title, issues):
+        groups = sorted(self.group_issues(issues), key=lambda i: i[1], reverse=True)
+
+        if len(groups) == 0:
+            return "No leaderboard to show, as no 'Done' issues found! :cry:"
+
+        lines = [title]
         i = 0
-        for name, count in self.group_issues(issues):
+        for (name, count) in groups:
             i += 1
             if i <= 5:
                 lines.append("{0} {1} ({2} issues)".format(self.digits[i], self.format_user_mention(name), count))
@@ -44,8 +49,8 @@ class LeaderBoard:
 
     def last_week(self):
         issues = self.jira.resolved_last_week().status_is("Done").get_issues()
-        return self.format_table(issues)
+        return self.format_table("Last week's leaderboard looked like this:", issues)
 
     def this_week(self):
         issues = self.jira.resolved_this_week().status_is("Done").get_issues()
-        return self.format_table(issues)
+        return self.format_table("Leaderboard for this week:", issues)

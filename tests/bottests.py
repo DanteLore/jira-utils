@@ -275,31 +275,70 @@ class JiraBotTests(unittest.TestCase):
 
     def get_completed_issue_set(self):
         return [
-            {"id": "XXX-1", "summary": "My first Jira", "assignee": "Tooth Fairy", "status": "Done"},
+            {"id": "XXX-1", "summary": "My first Jira", "assignee": "Santa", "status": "Done"},
             {"id": "XXX-2", "summary": "My second Jira", "assignee": "Tooth Fairy", "status": "Done"},
             {"id": "XXX-3", "summary": "My third Jira", "assignee": "Tooth Fairy", "status": "Done"},
             {"id": "XXX-4", "summary": "My fourth Jira", "assignee": "Bogey Man", "status": "Done"},
             {"id": "XXX-5", "summary": "My fifth Jira", "assignee": "Bogey Man", "status": "Done"},
             {"id": "XXX-6", "summary": "My sixth Jira", "assignee": "Santa", "status": "Done"},
-            {"id": "XXX-7", "summary": "My seventh Jira", "assignee": "Santa", "status": "Done"}
+            {"id": "XXX-7", "summary": "My seventh Jira", "assignee": "Tooth Fairy", "status": "Done"}
         ]
 
-    def get_name_lookup_for_leader_board(self):
+    def get_name_lookup_for_leaderboard(self):
         return {
             "Tooth Fairy": "TOOTHID",
             "Bogey Man": "BOGEYID",
             "Santa": "SANTAID"
         }
 
-    def test_leader_board(self):
-        jira = MockJira(issues=self.get_completed_issue_set())
-        slack = MockSlack(name_lookup=self.get_name_lookup_for_leader_board())
+    def do_leaderboard(self, msg="leader board", issues=None):
+        if not issues:
+            issues = self.get_completed_issue_set()
+
+        jira = MockJira(issues=issues)
+        slack = MockSlack(name_lookup=self.get_name_lookup_for_leaderboard())
         bot = JiraBot(jira, slack, "XXX", "LABEL", None, "#channel_name", 3, logger=self.logger, supress_quotes=True)
-        slack.add_incoming({u'text': u'<@BOTID> leader board'})
+        slack.add_incoming({u'text': u'<@BOTID> {0}'.format(msg)})
         bot.process_messages()
         self.assertEqual(len(slack.outgoing_messages), 1)
         self.assertEqual("#channel_name", slack.outgoing_messages[0]["recipient"])
         message = slack.outgoing_messages[0]["message"]
+        return message
+
+    def test_leaderboard(self):
+        message = self.do_leaderboard()
         self.assertIn("<@TOOTHID>", message)
         self.assertIn("<@BOGEYID>", message)
         self.assertIn("<@SANTAID>", message)
+
+    def test_leaderboard_properly_sorted(self):
+        messages = self.do_leaderboard().split("\n")
+        self.assertIn("<@TOOTHID>", messages[1])
+        self.assertIn("<@BOGEYID>", messages[2])
+        self.assertIn("<@SANTAID>", messages[3])
+
+    def test_leaderboard_title_for_last_week(self):
+        message = self.do_leaderboard("leader board for last week").lower()
+        self.assertIn("last week", message)
+
+    def test_leaderboard_title_for_this_week(self):
+        message = self.do_leaderboard().lower()
+        self.assertIn("this week", message)
+
+    def test_leaderboard_with_no_issues_closed(self):
+        message = self.do_leaderboard(issues=[{"id": "XXX-1", "summary": "My first Jira", "assignee": "P1", "status": "Backlog"}]).lower()
+        self.assertIn(":cry:", message)
+
+    def test_leaderboard_with_more_than_five_users(self):
+        issues = [
+            {"id": "XXX-1", "summary": "My first Jira", "assignee": "P1", "status": "Done"},
+            {"id": "XXX-2", "summary": "My second Jira", "assignee": "P2", "status": "Done"},
+            {"id": "XXX-3", "summary": "My third Jira", "assignee": "P3", "status": "Done"},
+            {"id": "XXX-4", "summary": "My fourth Jira", "assignee": "P4", "status": "Done"},
+            {"id": "XXX-5", "summary": "My fifth Jira", "assignee": "P5", "status": "Done"},
+            {"id": "XXX-6", "summary": "My sixth Jira", "assignee": "P6", "status": "Done"},
+            {"id": "XXX-7", "summary": "My seventh Jira", "assignee": "P7", "status": "Done"}
+        ]
+
+        message = self.do_leaderboard(issues=issues).split("\n")
+        self.assertEqual(6, len(message))

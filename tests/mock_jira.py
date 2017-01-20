@@ -90,10 +90,12 @@ class MockJira:
         return MockJira(issue_objects=self.issues[x:])
 
     def resolved_this_week(self):
-        return MockJira(issue_objects=self.issues)
+        new_issues = filter(lambda i: i.fields.status.lower() == "done", self.issues)
+        return MockJira(issue_objects=new_issues)
 
     def resolved_last_week(self):
-        return MockJira(issue_objects=self.issues)
+        new_issues = filter(lambda i: i.fields.status.lower() == "done", self.issues)
+        return MockJira(issue_objects=new_issues)
 
     def status_is_not(self, statuses):
         lower_statuses = map(lambda s: s.lower(), statuses)

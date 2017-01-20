@@ -68,7 +68,7 @@ class JiraBot:
                 messages.append(self.jira_executor.get_status_summary())
             self.logger.debug("Finished processing status command")
 
-        if "leader board" or "leaderboard" in text:
+        if "leader board" in text or "leaderboard" in text:
             if "last week" in text:
                 self.logger.debug("Received command to show leader board for LAST week")
                 messages.append(self.leader_board.last_week())
