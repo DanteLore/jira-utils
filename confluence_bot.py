@@ -2,20 +2,26 @@ import argparse
 import logging.handlers
 from datetime import datetime
 
+import pytz
+from dateutil import parser
 from dateutil.tz import tzutc
 
 from confluence.confluence import Confluence
 from confluence.kanban_report import KanbanReport
+from confluence.metrics_report import MetricsReport
 from jira_utils.jira_utils import Jira
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--user", help="Your confluence username")
-    parser.add_argument("--confluence", help="Confluence (and Jira) base URL e.g. https://xxx.atlassian.net")
-    parser.add_argument("--pageid", type=int, help="Parent page ID")
-    parser.add_argument("--jql", default=None, help="Base JQL fragment")
-    parser.add_argument("--title", default="Untitled", help="Title of the page")
-    args = parser.parse_args()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--user", required=True, help="Your confluence username")
+    argparser.add_argument("--confluence", required=True, help="Confluence (and Jira) base URL e.g. https://xxx.atlassian.net")
+    argparser.add_argument("--pageid", required=True, type=int, help="Page ID")
+    argparser.add_argument("--jql", default=None, help="Base JQL fragment")
+    argparser.add_argument("--title", default="Untitled", help="Title of the page")
+    argparser.add_argument("--start", required=True, help="Start date (YYYY/MM/DD)")
+    argparser.add_argument("--end", default=None, help="End date (YYYY/MM/DD) optional")
+    argparser.add_argument("--report", required=True, help="Report to run [kanban, metrics]")
+    args = argparser.parse_args()
 
     logger = logging.getLogger("ConfluenceBot")
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
@@ -39,8 +45,18 @@ if __name__ == "__main__":
     # confluence.update_page(args.pageid, content)
     # print confluence.get_page_body(args.pageid)
 
-    start = datetime(2017, 02, 27, tzinfo=tzutc())
+    start = pytz.utc.localize(parser.parse(args.start))
 
-    kbr = KanbanReport(jira, args.title, start)
-    page_title, page_body = kbr.generate()
-    confluence.create_page(args.pageid, page_body, page_title)
+    if args.end:
+        end = pytz.utc.localize(parser.parse(args.end))
+    else:
+        end = None
+
+    if args.report == "kanban":
+        report = KanbanReport(jira, args.title, start, end)
+        confluence.create_page(args.pageid, *report.generate())
+    elif args.report == "metrics":
+        report = MetricsReport(jira, args.title, start, end)
+        confluence.create_page(args.pageid, *report.generate())
+    else:
+        print "No such report {0}".format(args.report)

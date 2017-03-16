@@ -87,7 +87,7 @@ class Confluence:
         self.put_page(url, data)
         self.logger.info("Updated page at '{0}' to version {1}".format(info['title'], ver))
 
-    def create_page(self, parent_id, html, title):
+    def create_page(self, parent_id, title, html):
         data = {
             'type': 'page',
             'title': title,

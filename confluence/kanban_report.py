@@ -200,10 +200,10 @@ class KanbanReport:
     def leader_board(self, issues):
         groups = sorted(self.group_issues(issues), key=lambda i: i[1], reverse=True)
 
-        result = "\n<ul>"
+        result = '\n<ul>'
         for (name, count) in groups:
-            result += "<li>{0}: {1}</li>".format(name, count)
-        result += "</ul>\n"
+            result += '<li style="font-size: 1.5em;">{0}: <strong>{1}</strong></li>'.format(name, count)
+        result += '</ul>\n'
 
         return result
 
@@ -230,7 +230,7 @@ class KanbanReport:
         result += self.issue_list(self.jira.resolved_between(self.start, self.end).jql)
         result += '</td></tr></tbody></table>'
 
-        result += '<h2>Issues closed by</h2>'
+        result += '<h1>Issues closed by</h1>'
         result += self.leader_board(self.jira.resolved_between(self.start, self.end).get_issues())
 
         result += '<h1>To Do:</h1>'
