@@ -55,6 +55,12 @@ class Jira:
         fragment = 'status = "{0}"'.format(status)
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
+    def status_was(self, status, dt):
+        fragment = 'status was "{status}" on "{date}"'.format(
+            status=status,
+            date=dt.strftime("%Y/%m/%d"))
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
     def not_assigned(self):
         return Jira(self.server, self.join('assignee is empty'), logger=self.logger)
 
@@ -109,3 +115,20 @@ class Jira:
         fragment = 'status changed to "In Progress" before -{0}d'.format(days)
         return Jira(self.server, self.join(fragment), logger=self.logger)
 
+    def created_between(self, start, end):
+        fragment = 'created >= "{start}" and created < "{end}"'.format(
+            start=start.strftime("%Y/%m/%d"),
+            end=end.strftime("%Y/%m/%d")
+        )
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
+    def resolved_between(self, start, end):
+        fragment = 'resolutionDate >= "{start}" and resolutionDate < "{end}"'.format(
+            start=start.strftime("%Y/%m/%d"),
+            end=end.strftime("%Y/%m/%d")
+        )
+        return Jira(self.server, self.join(fragment), logger=self.logger)
+
+    def with_sub_team(self, team):
+        fragment = 'sub-team = "{0}"'.format(team)
+        return Jira(self.server, self.join(fragment), logger=self.logger)

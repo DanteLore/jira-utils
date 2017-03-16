@@ -1,7 +1,7 @@
 import unittest
 
 from jira_utils.jira_utils import Jira
-
+from datetime import datetime
 
 class JiraJqlGenerationTests(unittest.TestCase):
     def order_by_rank(self):
@@ -40,6 +40,10 @@ class JiraJqlGenerationTests(unittest.TestCase):
         jira = Jira("").status_is("STATE X")
         self.assertEqual('status = "STATE X"', jira.jql)
 
+    def test_status_was(self):
+        jira = Jira("").status_was("STATE X", datetime(2017, 1, 11))
+        self.assertEqual('status was "STATE X" on "2017/01/11"', jira.jql)
+
     def test_status_is_not(self):
         jira = Jira("").status_is_not(["STATE1", "STATE2"])
         self.assertEqual('status not in ("STATE1", "STATE2")', jira.jql)
@@ -56,22 +60,34 @@ class JiraJqlGenerationTests(unittest.TestCase):
         jira = Jira("").created_in_last_n_days(8)
         self.assertEqual('created >= -8d', jira.jql)
 
-    def resolved_since_8_days_ago(self):
+    def test_resolved_since_8_days_ago(self):
         jira = Jira("").resolved_n_days_ago(8)
         self.assertEqual('resolutionDate >= startOfDay(-8d) and resolutionDate < endOfDay(-8d)', jira.jql)
 
-    def resolved_since_2_days_ago(self):
+    def test_resolved_since_2_days_ago(self):
         jira = Jira("").resolved_n_days_ago(2)
         self.assertEqual('resolutionDate >= startOfDay(-2d) and resolutionDate < endOfDay(-2d)', jira.jql)
 
-    def resolved_this_week(self):
+    def test_resolved_this_week(self):
         jira = Jira("").resolved_this_week()
         self.assertEqual('resolutionDate >= startOfWeek()', jira.jql)
 
-    def resolved_last_week(self):
+    def test_resolved_last_week(self):
         jira = Jira("").resolved_last_week()
         self.assertEqual('resolutionDate >= startOfWeek(-1w) and resolutionDate < endOfWeek(-1w)', jira.jql)
 
-    def in_progress_for_7_days(self):
+    def test_in_progress_for_7_days(self):
         jira = Jira("").in_progress_for_n_days(7)
         self.assertEqual('status changed to "In Progress" before -7d', jira.jql)
+
+    def test_created_between(self):
+        jira = Jira("").created_between(datetime(2017, 1, 1), datetime(2017, 1, 3))
+        self.assertEqual('created >= "2017/01/01" and created < "2017/01/03"', jira.jql)
+
+    def test_resolved_between(self):
+        jira = Jira("").resolved_between(datetime(2017, 2, 2), datetime(2017, 2, 9))
+        self.assertEqual('resolutionDate >= "2017/02/02" and resolutionDate < "2017/02/09"', jira.jql)
+
+    def test_query_by_sub_team(self):
+        jira = Jira("").with_sub_team("Teamsters")
+        self.assertEqual('sub-team = "Teamsters"', jira.jql)
