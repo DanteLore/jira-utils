@@ -53,10 +53,10 @@ if __name__ == "__main__":
         end = None
 
     if args.report == "kanban":
-        report = KanbanReport(jira, args.title, start, end)
+        report = KanbanReport(jira, logger, args.title, start, end)
         confluence.create_page(args.pageid, *report.generate())
     elif args.report == "metrics":
-        report = MetricsReport(jira, args.title, start, end)
+        report = MetricsReport(jira, logger, args.title, start, end)
         confluence.create_page(args.pageid, *report.generate())
     else:
         print "No such report {0}".format(args.report)
