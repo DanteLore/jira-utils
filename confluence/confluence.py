@@ -39,7 +39,6 @@ class Confluence:
         password = keyring.get_password('confluence_script', username)
 
         if password is None:
-            self.logger.info("Saved password for user {0}".format(username))
             password = getpass.getpass()
             keyring.set_password('confluence_script', username, password)
 
