@@ -209,9 +209,8 @@ class KanbanReport:
         return result
 
     def generate(self):
-        title = '{title} - {start} to {end}'.format(
-            start=date_extension(self.start.day) + self.start.strftime(" %B"),
-            end=date_extension(self.end.day) + self.end.strftime(" %B"),
+        title = '{title} - w/e {end}'.format(
+            end=self.end.strftime("%Y-%m-%d"),
             title=self.title
         )
 
@@ -223,6 +222,9 @@ class KanbanReport:
             resolved=self.jira.resolved_between(self.start, self.end).count_issues()
         )
 
+        result += '<h1>Issues closed by</h1>'
+        result += self.leader_board(self.jira.resolved_between(self.start, self.end).get_issues())
+
         result += '<table class="wrapped relative-table" style="width: 100%;">'
         result += '<colgroup><col style="width: 50%;" /><col style="width: 50%;"/></colgroup>'
         result += '<tbody><tr><td><h2>Created this week</h2>'
@@ -230,9 +232,6 @@ class KanbanReport:
         result += '</td><td><h2>Resolved this week</h2>'
         result += self.issue_list(self.jira.resolved_between(self.start, self.end).jql)
         result += '</td></tr></tbody></table>'
-
-        result += '<h1>Issues closed by</h1>'
-        result += self.leader_board(self.jira.resolved_between(self.start, self.end).get_issues())
 
         result += '<h1>To Do:</h1>'
         result += self.age_table(self.jira.status_was("TO DO", self.end))

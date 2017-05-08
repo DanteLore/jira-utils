@@ -1,6 +1,6 @@
 import argparse
 import logging.handlers
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from dateutil import parser
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     argparser.add_argument("--pageid", required=True, type=int, help="Page ID")
     argparser.add_argument("--jql", default=None, help="Base JQL fragment")
     argparser.add_argument("--title", default="Untitled", help="Title of the page")
-    argparser.add_argument("--start", required=True, help="Start date (YYYY/MM/DD)")
+    argparser.add_argument("--start", default=None, help="Start date (YYYY/MM/DD)")
     argparser.add_argument("--end", default=None, help="End date (YYYY/MM/DD) optional")
     argparser.add_argument("--report", required=True, help="Report to run [kanban, metrics]")
     args = argparser.parse_args()
@@ -45,18 +45,30 @@ if __name__ == "__main__":
     # confluence.update_page(args.pageid, content)
     # print confluence.get_page_body(args.pageid)
 
-    start = pytz.utc.localize(parser.parse(args.start))
+    if args.start:
+        start = pytz.utc.localize(parser.parse(args.start))
+    else:
+        start = pytz.utc.localize(datetime.utcnow()) - timedelta(days=7)
 
     if args.end:
         end = pytz.utc.localize(parser.parse(args.end))
     else:
-        end = None
+        end = pytz.utc.localize(datetime.utcnow())
 
     if args.report == "kanban":
         report = KanbanReport(jira, logger, args.title, start, end)
         confluence.create_page(args.pageid, *report.generate())
     elif args.report == "metrics":
         report = MetricsReport(jira, logger, args.title, start, end)
-        confluence.create_page(args.pageid, *report.generate())
+        confluence.update_page(args.pageid, *report.generate())
+    elif args.report == "weekly_kanban":
+        week_start = start - timedelta(days=start.weekday())
+        report_end = end - timedelta(days=end.weekday())
+        year_start = week_start - timedelta(weeks=52)
+
+        main_page = MetricsReport(jira, logger, args.title, year_start, report_end)
+        confluence.update_page(args.pageid, *main_page.generate())
+        detail = KanbanReport(jira, logger, args.title, week_start, report_end)
+        confluence.create_page(args.pageid, *detail.generate())
     else:
         print "No such report {0}".format(args.report)

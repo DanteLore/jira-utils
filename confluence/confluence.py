@@ -53,7 +53,7 @@ class Confluence:
         r = requests.post(self.base_url, data=data, auth=self.auth, headers={'Content-Type': 'application/json'})
         r.raise_for_status()
 
-    def update_page(self, page_id, html, title=None):
+    def update_page(self, page_id, title, html):
         info = self.get_page_info(page_id)
 
         ver = int(info['version']['number']) + 1
