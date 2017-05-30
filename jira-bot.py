@@ -18,6 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('--fix-version', help='Jira Fix Version', default=None)
     parser.add_argument('--wip-limit', help='How many In Progress issues is too many?', default="3")
     parser.add_argument('--slack-key', help='The key for slack', required=True)
+    parser.add_argument('--user', help='Jira username', required=True)
     parser.add_argument('--channel', help='The channel on which to complain about stuff', required=True)
     parser.add_argument('--forever', help='Use this switch to run the script forever (once ever 5 mins)',
                         action='store_true', default=False)
@@ -35,7 +36,7 @@ if __name__ == "__main__":
     logger.setLevel(args.log_level)
     logger.addHandler(stream_handler)
 
-    jira = Jira(args.jira, logger=logger)
+    jira = Jira(args.jira, args.user, logger=logger)
     slack = Slack(args.slack_key, logger=logger)
 
     bot = JiraBot(jira=jira,

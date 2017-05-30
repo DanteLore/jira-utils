@@ -36,7 +36,7 @@ if __name__ == "__main__":
     jira_server = args.confluence.strip("/").replace("http://", "")
     confluence_base_url = args.confluence.strip("/") + "/wiki/rest/api/content"
 
-    jira = Jira(jira_server, jql=args.jql, logger=logger)
+    jira = Jira(jira_server, username=args.user, jql=args.jql, logger=logger)
     confluence = Confluence(base_url=confluence_base_url, username=args.user)
 
     # Lest we forget...

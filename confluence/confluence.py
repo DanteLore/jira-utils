@@ -36,11 +36,11 @@ class Confluence:
         return r.json()
 
     def get_login(self, username):
-        password = keyring.get_password('confluence_script', username)
+        password = keyring.get_password('confluence_bot', username)
 
         if password is None:
             password = getpass.getpass()
-            keyring.set_password('confluence_script', username, password)
+            keyring.set_password('confluence_bot', username, password)
 
         return username, password
 
